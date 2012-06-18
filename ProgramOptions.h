@@ -2,6 +2,7 @@
 #define COMMANDLINEPARSER_H_
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <set>
 #include <map>
@@ -52,9 +53,13 @@ private:
 
 	static std::set<program_option_impl*, is_less>* Options;
 
+	static std::set<std::string>* KnownLongParams;
+
 	static std::map<program_option_impl*, std::string> Values;
 
-	static boost::program_options::options_description* BoostOptions;
+	static boost::program_options::options_description* CommandLineOptions;
+
+	static boost::program_options::options_description* ConfigFileOptions;
 
 	static std::string	BinaryName;
 };
@@ -71,7 +76,7 @@ public:
 		_shortParam(args[_short_name | ""]),
 		_description(args[_description_text | ""]),
 		_argumentSketch(args[_argument_sketch | ""]),
-		_defaultValue(boost::lexical_cast<std::string>(args[_default_value | ""])) {
+		_defaultValue(boost::lexical_cast<std::string>(args[_default_value | "0"])) {
 
 		ProgramOptions::addProgramOption(this); 
 	}
@@ -101,12 +106,20 @@ public:
 	 *
 	 *   int foo = fooOption;
 	 *
-	 * as long as the argument given to fooOption can be converted to int.
+	 * as long as the argument given to fooOption can be converted to int
+	 * (otherwise, an exception will be thrown).
 	 *
-	 * This conversion also allows to check if an option is set via
+	 * This conversion also allows to check if an option is set. The implicit
+	 * conversion to bool ensures:
 	 *
-	 *   if (fooOption)
-	 *     ...
+	 *   if (fooOption) {
+	 *
+	 *     // fooOption is set to a value different to 'false'
+	 *
+	 *   } else {
+	 *
+	 *     // fooOption was not set or set to 'false'
+	 *   }
 	 */
 	template <typename ValueType>
 	operator ValueType() {
@@ -148,21 +161,37 @@ class ProgramOption : public program_option_impl {
 				(argument_sketch, *)))
 };
 
+/**
+ * Default type conversion for options. Tries to cast the value string to the
+ * desired type.
+ */
 template <typename TargetType>
 struct OptionConverter {
 
 	TargetType operator()(program_option_impl& option) {
 
+		std::cout << option.getLongParam() << " " << ProgramOptions::getOptionValue(option) << std::endl;
+
 		return boost::lexical_cast<TargetType>(ProgramOptions::getOptionValue(option));
 	}
 };
 
+/**
+ * Template specialisation for conversions to bool. Returns true, iff the
+ * option is set and its value is not 'false'.
+ */
 template <>
 struct OptionConverter<bool> {
 
 	bool operator()(program_option_impl& option) {
 
-		return ProgramOptions::isOptionSet(option);
+		if (!ProgramOptions::isOptionSet(option))
+			return false;
+
+		if (ProgramOptions::getOptionValue(option) == "false")
+			return false;
+
+		return true;
 	}
 };
 

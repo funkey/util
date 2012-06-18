@@ -15,13 +15,23 @@
 namespace util {
 
 std::set<program_option_impl*, is_less>*     ProgramOptions::Options = 0;
+std::set<std::string>*                       ProgramOptions::KnownLongParams = 0;
 std::map<program_option_impl*, std::string>  ProgramOptions::Values;
-boost::program_options::options_description* ProgramOptions::BoostOptions = 0;
+boost::program_options::options_description* ProgramOptions::CommandLineOptions = 0;
+boost::program_options::options_description* ProgramOptions::ConfigFileOptions  = 0;
 
 std::string ProgramOptions::BinaryName = "";
 
-ProgramOption help(_long_name = "help", _short_name = "h", _description_text = "Prints this help.");
-ProgramOption configFile(_long_name = "config", _short_name = "c", _description_text = "Path to a configuration file.");
+ProgramOption help(
+		_long_name = "help",
+		_short_name = "h",
+		_description_text = "Prints this help.");
+
+ProgramOption configFile(
+		_long_name = "config",
+		_short_name = "c",
+		_description_text = "Path to a configuration file to use instead of the default [name_of_binary].conf.",
+		_argument_sketch = "file");
 
 bool
 is_less::operator()(program_option_impl* left, program_option_impl* right) {
@@ -40,11 +50,14 @@ ProgramOptions::init(int argc, char** argv) {
 	if (Options == 0)
 		Options = new std::set<program_option_impl*, is_less>();
 
+	if (KnownLongParams == 0)
+		KnownLongParams = new std::set<std::string>();
+
 	// get all options
 	boost::program_options::variables_map values;
 	std::string                                  name;
 	boost::program_options::options_description* module;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, *BoostOptions), values);
+	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, *CommandLineOptions), values);
 	boost::program_options::notify(values);
 
 	// set initial program option values
@@ -52,6 +65,10 @@ ProgramOptions::init(int argc, char** argv) {
 
 		if (values.count(option->getLongParam()))
 			Values[option] = values[option->getLongParam()].as<std::string>();
+
+		if (option->getModuleName() != "")
+			if (values.count(option->getModuleName() + "." + option->getLongParam()))
+				Values[option] = values[option->getModuleName() + "." + option->getLongParam()].as<std::string>();
 	}
 
 	if (help) {
@@ -69,7 +86,7 @@ ProgramOptions::init(int argc, char** argv) {
 
 		std::ifstream config(configFileName.c_str());
 
-		boost::program_options::store(boost::program_options::parse_config_file(config, *BoostOptions), values);
+		boost::program_options::store(boost::program_options::parse_config_file(config, *ConfigFileOptions), values);
 
 	// otherwise, try to read from [binary_name].conf
 	} else {
@@ -78,7 +95,7 @@ ProgramOptions::init(int argc, char** argv) {
 
 		std::ifstream config((BinaryName + ".conf").c_str());
 
-		boost::program_options::store(boost::program_options::parse_config_file(config, *BoostOptions), values);
+		boost::program_options::store(boost::program_options::parse_config_file(config, *ConfigFileOptions), values);
 	}
 
 	boost::program_options::notify(values);
@@ -86,8 +103,10 @@ ProgramOptions::init(int argc, char** argv) {
 	// update program option values
 	foreach(program_option_impl* option, *Options) {
 
-		if (values.count(option->getLongParam()))
-			Values[option] = values[option->getLongParam()].as<std::string>();
+		std::string module = (option->getModuleName() != "" ? option->getModuleName() + "." : "");
+
+		if (values.count(module + option->getLongParam()))
+			Values[option] = values[module + option->getLongParam()].as<std::string>();
 	}
 }
 
@@ -112,72 +131,44 @@ ProgramOptions::addProgramOption(program_option_impl* option) {
 	if (Options == 0)
 		Options = new std::set<program_option_impl*, is_less>();
 
-	if (BoostOptions == 0)
-		BoostOptions = new boost::program_options::options_description("boost options");
+	if (KnownLongParams == 0)
+		KnownLongParams = new std::set<std::string>();
 
-	ProgramOptions::Options->insert(option);
+	if (CommandLineOptions == 0)
+		CommandLineOptions = new boost::program_options::options_description("command line options");
 
-	std::string moduleName = option->getModuleName();
+	if (ConfigFileOptions == 0)
+		ConfigFileOptions = new boost::program_options::options_description("config file options");
+
+	std::string moduleName = (option->getModuleName() != "" ? option->getModuleName() + "." : "");
 
 	std::string argument = option->getLongParam() + (option->getShortParam() != "" ? "," + option->getShortParam() : "");
 
-	// add the option to the boost options description
-	BoostOptions->add_options()(argument.c_str(), boost::program_options::value<std::string>()->implicit_value(""), "");
-}
+	// add the option to the boost options descriptions
 
-void
-ProgramOptions::printUsage() {
+	// to the command line options (--Module.longParam and -shortParam)
+	CommandLineOptions->add_options()
+			((moduleName + argument).c_str(),
+			boost::program_options::value<std::string>()->implicit_value("true"),
+			"");
 
-	std::string moduleName = "";
+	// to the config file options ([Module] longParam)
+	ConfigFileOptions->add_options()
+			((moduleName + option->getLongParam()).c_str(),
+			boost::program_options::value<std::string>()->implicit_value("true"),
+			"");
 
-	std::cout << std::endl
-						<< "Usage: " << BinaryName
-						<< " [\e[4moption\e[0m [\e[4mvalue\e[0m]] ..."
-						<< std::endl << std::endl;
+	// try adding the option without the module name (--longParam)
+	// (this might be ambiguous)
+	if (moduleName != "" &&
+	    KnownLongParams->count(option->getLongParam()) == 0)
+		CommandLineOptions->add_options()
+				(option->getLongParam().c_str(),
+				boost::program_options::value<std::string>()->implicit_value("true"),
+				"");
 
-	std::cout << "General options:" << std::endl << std::endl;
-
-	std::set<program_option_impl*>::iterator i;
-	for (i = Options->begin(); i != Options->end(); i++) {
-
-		if (moduleName != (*i)->getModuleName()) {
-
-			moduleName = (*i)->getModuleName();
-			std::cout << std::endl << moduleName << " options:" << std::endl << std::endl;
-		}
-
-		std::cout << *(*i) << std::endl;
-	}
-}
-
-std::string
-program_option_impl::getModuleName() {
-	return _moduleName;
-}
-
-std::string
-program_option_impl::getLongParam() {
-	return _longParam;
-}
-
-std::string
-program_option_impl::getShortParam() {
-	return _shortParam;
-}
-
-std::string
-program_option_impl::getDescription() {
-	return _description;
-}
-
-std::string
-program_option_impl::getArgumentSketch() {
-	return _argumentSketch;
-}
-
-std::string
-program_option_impl::getDefaultValue() {
-	return _defaultValue;
+	Options->insert(option);
+	KnownLongParams->insert(option->getLongParam());
 }
 
 std::string
@@ -286,12 +277,122 @@ stretchLine(std::string line, unsigned width) {
 	
 	return stretchedLine;
 }
- 
+
+void
+printBlock(std::string text, unsigned int indentation, unsigned int lineWidth, std::ostream& os) {
+
+	while (text.length() > 0) {
+
+		std::string line = extractLine(text, lineWidth);
+
+		size_t pos_new = line.find_first_of("\n");
+		// handle lines containing newlines separatly
+		if (pos_new != std::string::npos) {
+			std::string shortline = line.substr(0, pos_new + 1);
+			os << shortline;
+			// add remainer to text again
+			// and restart loop
+			text = line.substr(pos_new + 1, line.length()) + " " + text;
+			os << std::string(indentation, ' ');
+			continue;
+		}
+
+		// stretch every line except last one
+		if (text.length() > 0 || pos_new != std::string::npos)
+			os << stretchLine(line, lineWidth) << std::endl;
+		else
+			os << line << std::endl;
+
+		os << std::string(indentation, ' ');
+	}
+}
+
+void
+ProgramOptions::printUsage() {
+
+	std::string moduleName = "";
+
+	std::cout << std::endl
+						<< "Usage: " << BinaryName
+						<< " --[\e[4moption\e[0m [\e[4mvalue\e[0m]] ..."
+						<< std::endl << std::endl;
+
+	std::string optionsText;
+
+	optionsText +=
+			"Options can be given on the command line or via a configuration file "
+			"(default: " + BinaryName + ".conf):\n" +
+			"\n" +
+			"  " + BinaryName + " --Module.option value\n" +
+			"\n" +
+			"is equivalent to giving a configuration file containing\n" +
+			"\n" +
+			"  [Module]\n" +
+			"  option=value\n" +
+			"\n" +
+			"Command line arguments overwrite config file settings. If the name " +
+			"of an option is unique, its module part may be omitted on the command " +
+			"line. Short versions of options are available for the command line as " +
+			"shown below.\n" +
+			"\n";
+
+	// get tty width:
+	winsize wsize;
+	ioctl(0, TIOCGWINSZ, &wsize);
+	int numColumns = std::min(wsize.ws_col - 5, 100);
+
+	printBlock(optionsText, 0, numColumns, std::cout);
+
+	std::cout << "General options:" << std::endl << std::endl;
+
+	std::set<program_option_impl*>::iterator i;
+	for (i = Options->begin(); i != Options->end(); i++) {
+
+		if (moduleName != (*i)->getModuleName()) {
+
+			moduleName = (*i)->getModuleName();
+			std::cout << std::endl << "Module '" << moduleName << "':" << std::endl << std::endl;
+		}
+
+		std::cout << *(*i) << std::endl;
+	}
+}
+
+std::string
+program_option_impl::getModuleName() {
+	return _moduleName;
+}
+
+std::string
+program_option_impl::getLongParam() {
+	return _longParam;
+}
+
+std::string
+program_option_impl::getShortParam() {
+	return _shortParam;
+}
+
+std::string
+program_option_impl::getDescription() {
+	return _description;
+}
+
+std::string
+program_option_impl::getArgumentSketch() {
+	return _argumentSketch;
+}
+
+std::string
+program_option_impl::getDefaultValue() {
+	return _defaultValue;
+}
+
 std::ostream&
 operator<<(std::ostream& os, program_option_impl& option) {
 
-	int sizeLongParam       = option.getLongParam().length() + 2;
-	int sizeShortParam      = (option.getShortParam() != "" ? option.getShortParam().length() + 1: 0);
+	int sizeLongParam       = option.getLongParam().length();
+	int sizeShortParam      = (option.getShortParam() != "" ? option.getShortParam().length() + 1 : 0);
 	int sizeArgumentSketch  = option.getArgumentSketch().length();
 
 	// get tty width:
@@ -299,7 +400,7 @@ operator<<(std::ostream& os, program_option_impl& option) {
 	ioctl(0, TIOCGWINSZ, &wsize);
 	int numColumns = std::min(wsize.ws_col - 5, 100);
 
-	int spaceIndentation = 4;
+	int spaceIndentation = 2;
 	int spaceLongParam   = 25;
 	int spaceShortParam  = 5;
 	int spaceDescription =
@@ -313,38 +414,15 @@ operator<<(std::ostream& os, program_option_impl& option) {
 	if (option.getShortParam() != "")
 		os << "-" << option.getShortParam();
 	
-	os << std::string(spaceShortParam - sizeShortParam, ' ');
+	os << std::string(std::max(0, spaceShortParam - sizeShortParam), ' ');
 
-	os << "--" << option.getLongParam() << " \e[4m" << option.getArgumentSketch() << "\e[0m"; 
+	os << option.getLongParam() << " \e[4m" << option.getArgumentSketch() << "\e[0m"; 
 
-	os << std::string(spaceLongParam - (sizeLongParam + 1 + sizeArgumentSketch), ' ');
+	os << std::string(std::max(0, spaceLongParam - (sizeLongParam + 1 + sizeArgumentSketch)), ' ');
 
 	std::string description = option.getDescription();
 
-	while (description.length() > 0) {
-
-		std::string line = extractLine(description, spaceDescription);
-
-		size_t pos_new = line.find_first_of("\n");
-		// handle lines containing newlines separatly
-		if (pos_new != std::string::npos) {
-			std::string shortline = line.substr(0, pos_new + 1);
-			os << shortline;
-			// add remainer to description again
-			// and restart loop
-			description = line.substr(pos_new + 1, line.length()) + " " + description;
-			os << std::string(spaceIndentation + spaceLongParam + spaceShortParam , ' ');
-			continue;
-		}
-
-		// stretch every line except last one
-		if (description.length() > 0 || pos_new != std::string::npos)
-			os << stretchLine(line, spaceDescription) << std::endl;
-		else
-			os << line << std::endl;
-			
-		os << std::string(spaceIndentation + spaceLongParam + spaceShortParam , ' ');
-	}
+	printBlock(description, spaceIndentation + spaceLongParam + spaceShortParam, spaceDescription, os);
 
 	return os;
 }
