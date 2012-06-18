@@ -19,34 +19,50 @@
 namespace logger {
 
 // Define command line options
-util::ProgramOption logLevel("", "--log-level", "-v",
-    "Specifies the level of verbosity. "
-    "Valid values for level are: \"none\" (no ouput at all), "
-    "\"error\" (error messages only), "
-    "\"user\" (useful information, default setting), "
-    "\"debug\" (internal information used for debugging) "
-    "and \"all\" (maximum verbosity).\n"
-    "See section on logging for more options.", "level");
+util::ProgramOption logLevel(
+		util::_long_name = "log-level",
+		util::_short_name = "v",
+		util::_description_text =
+		"Specifies the level of verbosity. "
+		"Valid values for level are: \"none\" (no ouput at all), "
+		"\"error\" (error messages only), "
+		"\"user\" (useful information, default setting), "
+		"\"debug\" (internal information used for debugging) "
+		"and \"all\" (maximum verbosity).\n"
+		"See section on logging for more options.",
+		util::_argument_sketch = "level");
 
-util::ProgramOption showChannels("Logging", "--show-log-channels", "",
-    "Prints all avalaible log-channels. Log-channels are used to "
-    "collect logging messages belonging to certain units of the "
-    "program so that they can be adjusted individually. If "
-    "you leave everything as it is, log-channel messages are handled "
-    "like any other log message the program.");
+util::ProgramOption showChannels(
+		util::_module = "Logging",
+		util::_long_name = "show-log-channels",
+		util::_description_text =
+		"Prints all avalaible log-channels. Log-channels are used to "
+		"collect logging messages belonging to certain units of the "
+		"program so that they can be adjusted individually. If "
+		"you leave everything as it is, log-channel messages are handled "
+		"like any other log message the program.");
 
-util::ProgramOption channelLevel("Logging", "--log-level-c", "-vc",
-    "Sets the log level for certain log-channels independent "
-    "of the global log level.\n"
-    "levels syntax: channel1=loglevel1,channel2=loglevel2,...\n"
-    "For a list of possible channels type "
-    "\"--show-log-channels\".", "levels");
+util::ProgramOption channelLevel(
+		util::_module = "Logging",
+		util::_long_name = "channels-log-level",
+		util::_short_name = "V",
+		util::_description_text =
+		"Sets the log level for certain log-channels independent "
+		"of the global log level.\n"
+		"levels syntax: channel1=loglevel1,channel2=loglevel2,...\n"
+		"For a list of possible channels type "
+		"\"--show-log-channels\".",
+		util::_argument_sketch = "levels");
 
-util::ProgramOption channelToFile("Logging", "--log-file-c", "",
-    "Redirects the output of certain log-channels to files.\n"
-    "files syntax: channel1=file1,channel2=file2,...\n"
-    "For a list of possible channels type "
-    "\"--show-log-channels\".", "files");
+util::ProgramOption channelToFile(
+		util::_module = "Logging",
+		util::_long_name = "log-file-c",
+		util::_description_text =
+		"Redirects the output of certain log-channels to files.\n"
+		"files syntax: channel1=file1,channel2=file2,...\n"
+		"For a list of possible channels type "
+		"\"--show-log-channels\".",
+		util::_argument_sketch = "files");
 
 Logger glutton(0);
 
@@ -197,7 +213,7 @@ void
 LogManager::init()
 {
   // set global log level
-  if (!util::ProgramOptions::isOptionSet(logLevel))
+  if (!logLevel)
   {
     setGlobalLogLevel(User);
     out.setLogLevel(User);
@@ -206,25 +222,24 @@ LogManager::init()
   {
     LOG_DEBUG(out) << "[LogManager] " << logLevel.getLongParam() << " command-line option detected\n";
 
-    std::string verbosity =
-      util::ProgramOptions::getOptionValue(logLevel);
+    std::string verbosity = logLevel;
 
     setGlobalLogLevel(getLogLevel(verbosity));
 
     LOG_DEBUG(out) << "[LogManager] Loglevel set to \"" << verbosity << "\"\n";
   }
 
-  if (util::ProgramOptions::isOptionSet(showChannels)) {
+  if (showChannels) {
     printChannels();
     exit(0);
   }
 
   // set channel log levels
-  if (util::ProgramOptions::isOptionSet(channelLevel)) {
+  if (channelLevel) {
     
     LOG_DEBUG(out) << "[LogManager] " << channelLevel.getLongParam() << " command-line option detected\n";
 
-    std::string channelLevels = util::ProgramOptions::getOptionValue(channelLevel);
+    std::string channelLevels = channelLevel;
 
     while (channelLevels.length() > 0) {
 
@@ -262,11 +277,11 @@ LogManager::init()
   }
 
   // redirect channels to files
-  if (util::ProgramOptions::isOptionSet(channelToFile)) {
+  if (channelToFile) {
 
    LOG_DEBUG(out) << "[LogManager] " << channelToFile.getLongParam() << " command-line option detected\n";
 
-    std::string channelFiles = util::ProgramOptions::getOptionValue(channelToFile);
+    std::string channelFiles = channelToFile;
 
     while (channelFiles.length() > 0) {
 
