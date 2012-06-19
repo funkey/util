@@ -129,6 +129,17 @@ public:
 		return converter(*this);
 	}
 
+	/**
+	 * Explicit conversion to ValueType.
+	 */
+	template <typename ValueType>
+	ValueType as() {
+
+		OptionConverter<ValueType> converter;
+
+		return converter(*this);
+	}
+
 private:
 
 	std::string _moduleName;
