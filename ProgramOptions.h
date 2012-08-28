@@ -181,8 +181,6 @@ struct OptionConverter {
 
 	TargetType operator()(program_option_impl& option) {
 
-		std::cout << option.getLongParam() << " " << ProgramOptions::getOptionValue(option) << std::endl;
-
 		return boost::lexical_cast<TargetType>(ProgramOptions::getOptionValue(option));
 	}
 };
