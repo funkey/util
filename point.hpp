@@ -42,6 +42,11 @@ struct point {
 		return *this;
 	}
 
+	point<T> operator-() const {
+
+		return point<T>(-x, -y);
+	}
+
 	template <typename S>
 	point<T>& operator*=(const S& s) {
 

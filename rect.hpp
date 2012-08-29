@@ -37,7 +37,7 @@ struct rect {
 		return maxY - minY;
 	}
 
-	bool intersects(const rect<T>& other) {
+	bool intersects(const rect<T>& other) const {
 
 		// two non-intersecting rectanlges are separated by a line parallel to
 		// either x or y
@@ -58,7 +58,8 @@ struct rect {
 		return minX <= point.x && minY <= point.y && maxX >= point.x && maxY >= point.y;
 	}
 
-	rect<T>& operator+=(const point<T>& other) {
+	template <typename S>
+	rect<T>& operator+=(const point<S>& other) {
 
 		minX += other.x;
 		maxX += other.x;
@@ -68,7 +69,8 @@ struct rect {
 		return *this;
 	}
 
-	rect<T>& operator-=(const point<T>& other) {
+	template <typename S>
+	rect<T>& operator-=(const point<S>& other) {
 
 		minX -= other.x;
 		maxX -= other.x;
@@ -78,7 +80,8 @@ struct rect {
 		return *this;
 	}
 
-	rect<T>& operator*=(const T& s) {
+	template <typename S>
+	rect<T>& operator*=(const S& s) {
 
 		minX *= s;
 		maxX *= s;
@@ -88,7 +91,8 @@ struct rect {
 		return *this;
 	}
 
-	rect<T>& operator/=(const T& s) {
+	template <typename S>
+	rect<T>& operator/=(const S& s) {
 
 		minX /= s;
 		maxX /= s;
@@ -98,7 +102,8 @@ struct rect {
 		return *this;
 	}
 
-	rect<T>& operator*=(const point<T>& p) {
+	template <typename S>
+	rect<T>& operator*=(const point<S>& p) {
 
 		minX *= p.x;
 		maxX *= p.x;
@@ -108,7 +113,8 @@ struct rect {
 		return *this;
 	}
 
-	rect<T>& operator/=(const point<T>& p) {
+	template <typename S>
+	rect<T>& operator/=(const point<S>& p) {
 
 		minX /= p.x;
 		maxX /= p.x;
@@ -118,7 +124,8 @@ struct rect {
 		return *this;
 	}
 
-	bool operator==(const rect<T>& other) const {
+	template <typename S>
+	bool operator==(const rect<S>& other) const {
 
 		return minX == other.minX &&
 		       minY == other.minY &&
@@ -126,22 +133,23 @@ struct rect {
 		       maxY == other.maxY;
 	}
 
-	bool operator!=(const rect<T>& other) const {
+	template <typename S>
+	bool operator!=(const rect<S>& other) const {
 
 		return !(*this == other);
 	}
 };
 
-template <typename T>
-rect<T> operator+(const rect<T>& p, const point<T>& o) {
+template <typename T, typename S>
+rect<T> operator+(const rect<T>& p, const point<S>& o) {
 
 	rect<T> result(p);
 
 	return result += o;
 }
 
-template <typename T>
-rect<T> operator-(const rect<T>& p, const point<T>& o) {
+template <typename T, typename S>
+rect<T> operator-(const rect<T>& p, const point<S>& o) {
 
 	rect<T> result(p);
 
