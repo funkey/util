@@ -39,9 +39,9 @@ public:
 
 	static void init(int argc, char** argv);
 
-	static bool isOptionSet(program_option_impl& option);
+	static bool isOptionSet(const program_option_impl& option);
 
-	static std::string getOptionValue(program_option_impl& option);
+	static std::string getOptionValue(const program_option_impl& option);
 
 	static void addProgramOption(program_option_impl* option);
 
@@ -55,7 +55,7 @@ private:
 
 	static std::set<std::string>* KnownLongParams;
 
-	static std::map<program_option_impl*, std::string> Values;
+	static std::map<const program_option_impl*, std::string> Values;
 
 	static boost::program_options::options_description* CommandLineOptions;
 
@@ -91,7 +91,7 @@ public:
 
 	std::string getArgumentSketch();
 
-	std::string getDefaultValue();
+	std::string getDefaultValue() const;
 
 	/**
 	 * Defines a lexicographic order on command line
@@ -122,7 +122,7 @@ public:
 	 *   }
 	 */
 	template <typename ValueType>
-	operator ValueType() {
+	operator ValueType() const {
 
 		OptionConverter<ValueType> converter;
 
@@ -179,7 +179,7 @@ class ProgramOption : public program_option_impl {
 template <typename TargetType>
 struct OptionConverter {
 
-	TargetType operator()(program_option_impl& option) {
+	TargetType operator()(const program_option_impl& option) const {
 
 		return boost::lexical_cast<TargetType>(ProgramOptions::getOptionValue(option));
 	}
@@ -192,7 +192,7 @@ struct OptionConverter {
 template <>
 struct OptionConverter<bool> {
 
-	bool operator()(program_option_impl& option) {
+	bool operator()(const program_option_impl& option) const {
 
 		if (!ProgramOptions::isOptionSet(option))
 			return false;

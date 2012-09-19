@@ -14,11 +14,11 @@
 
 namespace util {
 
-std::set<program_option_impl*, is_less>*     ProgramOptions::Options = 0;
-std::set<std::string>*                       ProgramOptions::KnownLongParams = 0;
-std::map<program_option_impl*, std::string>  ProgramOptions::Values;
-boost::program_options::options_description* ProgramOptions::CommandLineOptions = 0;
-boost::program_options::options_description* ProgramOptions::ConfigFileOptions  = 0;
+std::set<program_option_impl*, is_less>*          ProgramOptions::Options = 0;
+std::set<std::string>*                            ProgramOptions::KnownLongParams = 0;
+std::map<const program_option_impl*, std::string> ProgramOptions::Values;
+boost::program_options::options_description*      ProgramOptions::CommandLineOptions = 0;
+boost::program_options::options_description*      ProgramOptions::ConfigFileOptions  = 0;
 
 std::string ProgramOptions::BinaryName = "";
 
@@ -111,13 +111,13 @@ ProgramOptions::init(int argc, char** argv) {
 }
 
 bool
-ProgramOptions::isOptionSet(program_option_impl& option) {
+ProgramOptions::isOptionSet(const program_option_impl& option) {
 
 	return Values.find(&option) != Values.end();
 }
 
 std::string
-ProgramOptions::getOptionValue(program_option_impl& option) {
+ProgramOptions::getOptionValue(const program_option_impl& option) {
 
 	if (Values.count(&option))
 		return Values[&option];
@@ -384,7 +384,7 @@ program_option_impl::getArgumentSketch() {
 }
 
 std::string
-program_option_impl::getDefaultValue() {
+program_option_impl::getDefaultValue() const {
 	return _defaultValue;
 }
 
