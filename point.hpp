@@ -14,12 +14,12 @@ struct point {
 	template <typename S>
 	point(const S& x_, const S& y_) :
 		x(x_),
-		y(y_) {};
+		y(y_) {}
 
 	template <typename S>
 	point(const point<S>& other) :
 		x(other.x),
-		y(other.y) {};
+		y(other.y) {}
 
 	T x;
 	T y;
