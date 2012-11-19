@@ -44,6 +44,16 @@ struct rect {
 		return maxY - minY;
 	}
 
+	point<T> upperLeft() const {
+
+		return point<T>(minX, minY);
+	}
+
+	point<T> lowerRight() const {
+
+		return point<T>(maxX, maxY);
+	}
+
 	bool intersects(const rect<T>& other) const {
 
 		// two non-intersecting rectanlges are separated by a line parallel to
@@ -147,48 +157,56 @@ struct rect {
 	}
 };
 
-template <typename T, typename S>
-rect<T> operator+(const rect<T>& p, const point<S>& o) {
+} // namespace util
 
-	rect<T> result(p);
+template <typename T, typename S>
+util::rect<T> operator+(const util::rect<T>& p, const util::point<S>& o) {
+
+	util::rect<T> result(p);
 
 	return result += o;
 }
 
 template <typename T, typename S>
-rect<T> operator-(const rect<T>& p, const point<S>& o) {
+util::rect<T> operator-(const util::rect<T>& p, const util::point<S>& o) {
 
-	rect<T> result(p);
+	util::rect<T> result(p);
 
 	return result -= o;
 }
 
 template <typename T, typename S>
-rect<T> operator*(const rect<T>& p, const S& s) {
+util::rect<T> operator*(const util::rect<T>& p, const S& s) {
 
-	rect<T> result(p);
+	util::rect<T> result(p);
 
 	return result *= s;
 }
 
 template <typename T, typename S>
-rect<T> operator/(const rect<T>& p, const S& s) {
+util::rect<T> operator*(const S& s, const util::rect<T>& p) {
 
-	rect<T> result(p);
+	util::rect<T> result(p);
+
+	return result *= s;
+}
+
+template <typename T, typename S>
+util::rect<T> operator/(const util::rect<T>& p, const S& s) {
+
+	util::rect<T> result(p);
 
 	return result /= s;
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const rect<T>& rect) {
+std::ostream& operator<<(std::ostream& os, const util::rect<T>& rect) {
 
 	os << "[" << rect.minX << ", " << rect.minY
 	   << ", " << rect.maxX << ", " << rect.maxY << "]";
 
 	return os;
 }
-
-} // namespace util
 
 #endif // UTIL_RECT_H__
 

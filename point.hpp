@@ -94,47 +94,55 @@ struct point {
 	}
 };
 
-template <typename T, typename S>
-point<T> operator+(const point<T>& p, const point<S>& o) {
+} // namespace util
 
-	point<T> result(p);
+template <typename T, typename S>
+util::point<T> operator+(const util::point<T>& p, const util::point<S>& o) {
+
+	util::point<T> result(p);
 
 	return result += o;
 }
 
 template <typename T, typename S>
-point<T> operator-(const point<T>& p, const point<S>& o) {
+util::point<T> operator-(const util::point<T>& p, const util::point<S>& o) {
 
-	point<T> result(p);
+	util::point<T> result(p);
 
 	return result -= o;
 }
 
 template <typename T, typename S>
-point<T> operator*(const point<T>& p, const S& s) {
+util::point<T> operator*(const util::point<T>& p, const S& s) {
 
-	point<T> result(p);
+	util::point<T> result(p);
+
+	return result *= s;
+}
+
+template <typename T>
+util::point<T> operator*(const T& s, const util::point<T>& p) {
+
+	util::point<T> result(p);
 
 	return result *= s;
 }
 
 template <typename T, typename S>
-point<T> operator/(const point<T>& p, const S& s) {
+util::point<T> operator/(const util::point<T>& p, const S& s) {
 
-	point<T> result(p);
+	util::point<T> result(p);
 
 	return result /= s;
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const point<T>& point) {
+std::ostream& operator<<(std::ostream& os, const util::point<T>& point) {
 
 	os << "(" << point.x << ", " << point.y << ")";
 
 	return os;
 }
-
-} // namespace util
 
 #endif // UTIL_POINT_H__
 
