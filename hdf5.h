@@ -42,7 +42,7 @@ write(
 
 	// create an hdf5 dim vector
 	std::vector<hsize_t> hdims;
-	for (int i = 0; i < dims.size(); i++)
+	for (unsigned int i = 0; i < dims.size(); i++)
 		hdims.push_back(dims[i]);
 
 	// create the data space
