@@ -16,6 +16,13 @@ struct rect {
 	 */
 	rect() {};
 
+	template <typename S>
+	rect(const rect<S>& other) :
+		minX(other.minX),
+		minY(other.minY),
+		maxX(other.maxX),
+		maxY(other.maxY) {};
+
 	rect(const T& minX_, const T& minY_, const T& maxX_, const T& maxY_) :
 		minX(minX_),
 		minY(minY_),
@@ -55,7 +62,7 @@ struct rect {
 
 	bool contains(const point<T>& point) const {
 
-		return minX <= point.x && minY <= point.y && maxX >= point.x && maxY >= point.y;
+		return minX <= point.x && minY <= point.y && maxX > point.x && maxY > point.y;
 	}
 
 	template <typename S>
