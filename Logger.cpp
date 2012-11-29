@@ -11,8 +11,6 @@
 #include <string>
 #include <cstdlib>
 
-#include <boost/thread.hpp>
-
 #include "ProgramOptions.h"
 #include "Logger.h"
 
@@ -64,7 +62,7 @@ util::ProgramOption channelToFile(
 		"\"--show-log-channels\".",
 		util::_argument_sketch = "files");
 
-Logger glutton(0);
+Logger glutton(0, "");
 
 // Initialize global logging-streams:
 LogLevel  error = Error;
@@ -86,10 +84,10 @@ std::set<LogChannel*>*                LogChannel::logChannels = 0;
 LogChannel::LogChannel(std::string channelName, std::string prefix) :
   _channelName(channelName),
   _prefix(prefix),
-  _error(std::cerr.rdbuf()),
-  _user(std::cout.rdbuf()),
-  _debug(std::cout.rdbuf()),
-  _all(std::cout.rdbuf()),
+  _error(std::cerr.rdbuf(), _prefix),
+  _user(std::cout.rdbuf(), _prefix),
+  _debug(std::cout.rdbuf(), _prefix),
+  _all(std::cout.rdbuf(), _prefix),
   _level(Global)
 {
   getChannels()->insert(this);
@@ -104,7 +102,7 @@ LogChannel::getChannels() {
   return logChannels;
 }
 
-std::ostream&
+Logger&
 LogChannel::operator()(LogLevel level) {
 
   LogLevel  myLevel =
@@ -114,19 +112,19 @@ LogChannel::operator()(LogLevel level) {
   switch (level) {
     case Error:
       if (myLevel >= Error)
-        return _error << boost::this_thread::get_id() << " " << _prefix;
+        return _error;
       break;
     case User:
       if (myLevel >= User)
-        return _user << boost::this_thread::get_id() << " " << _prefix;
+        return _user;
       break;
     case Debug:
       if (myLevel >= Debug)
-        return _debug << boost::this_thread::get_id() << " " << _prefix;
+        return _debug;
       break;
     case All:
       if (myLevel >= All)
-        return _all << boost::this_thread::get_id() << " " << _prefix;
+        return _all;
       break;
     default:
       break;
@@ -152,7 +150,7 @@ LogChannel::getLogLevel() {
 void
 LogChannel::redirectToFile(std::string filename) {
 
-  Logger fileLogger(LogFileManager::openFile(filename));
+  Logger fileLogger(LogFileManager::openFile(filename), _prefix);
 
   _error = fileLogger;
   _user  = fileLogger;
@@ -191,14 +189,18 @@ LogFileManager::openFile(std::string filename) {
 
 // Implementation - Logger
 
-Logger::Logger(std::streambuf* streamBuffer) :
-  std::ostream(streamBuffer)
+Logger::Logger(std::streambuf* streamBuffer, const std::string& prefix) :
+  std::ostream(streamBuffer),
+  _prefix(prefix),
+  _printPrefix(true)
 {
   // Empty
 }
 
-Logger::Logger(Logger& logger) :
-  std::ostream(logger.rdbuf()) {
+Logger::Logger(Logger& logger, const std::string& prefix) :
+  std::ostream(logger.rdbuf()),
+  _prefix(prefix),
+  _printPrefix(true) {
   // Empty
 }
 

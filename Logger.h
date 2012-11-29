@@ -15,6 +15,8 @@
 #include<set>
 #include<map>
 
+#include <boost/thread.hpp>
+
 #define LOG_ERROR(channel) if (channel.getLogLevel() >= logger::Error) channel(logger::error)
 #define LOG_USER(channel)  if (channel.getLogLevel() >= logger::User)  channel(logger::user)
 #define LOG_DEBUG(channel) if (channel.getLogLevel() >= logger::Debug) channel(logger::debug)
@@ -39,13 +41,83 @@ class LogChannel;
 
 class Logger : public std::ostream {
 
-  public:
+public:
 
-    Logger(std::streambuf* streamBuffer);
+	Logger(std::streambuf* streamBuffer, const std::string& prefix);
 
-    Logger(Logger& logger);
+	Logger(Logger& logger, const std::string& prefix);
 
-    Logger& operator=(const Logger& logger);
+	Logger& operator=(const Logger& logger);
+
+	template <typename T>
+	Logger& operator<<(T* t) {
+
+		printPrefix();
+
+		std::ostream& s = *this;
+		s << t;
+
+		return *this;
+	}
+
+	template <typename T>
+	Logger& operator<<(const T& t) {
+
+		printPrefix();
+
+		std::ostream& s = *this;
+		s << t;
+
+		return *this;
+	}
+
+	Logger& operator<<(std::ostream&(*fp)(std::ostream&)) {
+
+		printPrefix();
+
+		std::ostream::operator<<(fp);
+
+		// the next operator<< will cause the prefix to be printed after a 
+		// newline
+		if (fp == &std::endl<std::ostream::char_type, std::ostream::traits_type>)
+			_printPrefix = true;
+
+		return *this;
+	}
+
+	Logger& operator<<(std::ios&(*fp)(std::ios&)) {
+
+		printPrefix();
+
+		std::ostream::operator<<(fp);
+
+		return *this;
+	}
+
+	Logger& operator<<(std::ios_base&(*fp)(std::ios_base&)) {
+
+		printPrefix();
+
+		std::ostream::operator<<(fp);
+
+		return *this;
+	}
+
+private:
+
+	void printPrefix() {
+
+		if (_printPrefix) {
+
+			_printPrefix = false;
+			*this << boost::this_thread::get_id() << " " << _prefix;
+		}
+	}
+
+	// reference to the owning LogChannel's prefix
+	const std::string& _prefix;
+
+	bool _printPrefix;
 };
 
 class LogFileManager {
@@ -77,7 +149,7 @@ class LogChannel {
 
     LogChannel(std::string channelName, std::string prefix = "");
 
-    std::ostream& operator()(LogLevel level);
+    Logger& operator()(LogLevel level);
 
     std::string getName() { return _channelName; };
 
