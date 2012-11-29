@@ -16,6 +16,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace util {
+
 template<class T>
 inline std::string to_string(const T& value) {
 
@@ -44,6 +46,8 @@ inline T from_string(const std::string& string) {
 
   return value;
 }
+
+} // namespace util
 
 template<class T, class U>
 std::vector<T> operator+(std::vector<T> lhs, std::vector<U> rhs) {
