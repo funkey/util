@@ -75,6 +75,11 @@ struct rect {
 		return minX <= point.x && minY <= point.y && maxX > point.x && maxY > point.y;
 	}
 
+	T area() const {
+
+		return width()*height();
+	}
+
 	template <typename S>
 	rect<T>& operator+=(const point<S>& other) {
 
