@@ -54,6 +54,11 @@ struct rect {
 		return point<T>(maxX, maxY);
 	}
 
+	point<T> center() const {
+
+		return point<T>((minX + maxX)/2, (minY + maxY)/2);
+	}
+
 	bool intersects(const rect<T>& other) const {
 
 		// two non-intersecting rectanlges are separated by a line parallel to
