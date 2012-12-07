@@ -21,6 +21,7 @@ struct SignalsError  : virtual Exception {};
 struct Segfault          : virtual Exception {};
 struct IOError           : virtual Exception {};
 struct SizeMismatchError : virtual Exception {};
+struct UsageError        : virtual Exception {};
 
 /*
  * TAGS

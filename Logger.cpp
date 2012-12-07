@@ -13,6 +13,7 @@
 
 #include "ProgramOptions.h"
 #include "Logger.h"
+#include "exceptions.h"
 
 namespace logger {
 
@@ -179,8 +180,8 @@ LogFileManager::openFile(std::string filename) {
   std::filebuf* filebuffer = new std::filebuf();
   if (!filebuffer->open(filename.c_str(), std::ios_base::out)) {
 
-    LOG_ERROR(out) << "[LogFileManager] Unable to open \"" << filename << "\".\n";
-    throw "[LogFileManager] Attempt to open file \"" + filename + "\" failed.";
+    LOG_ERROR(out) << "[LogFileManager] Unable to open \"" << filename << "\"" << std::endl;
+    BOOST_THROW_EXCEPTION(IOError() << error_message(std::string("[LogFileManager] Attempt to open file \"") + filename + "\" failed."));
   }
   filebuffers[filename] = filebuffer;
   return filebuffer;
@@ -222,13 +223,13 @@ LogManager::init()
   } 
   else
   {
-    LOG_DEBUG(out) << "[LogManager] " << logLevel.getLongParam() << " command-line option detected\n";
+    LOG_DEBUG(out) << "[LogManager] " << logLevel.getLongParam() << " command-line option detected" << std::endl;
 
     std::string verbosity = logLevel;
 
     setGlobalLogLevel(getLogLevel(verbosity));
 
-    LOG_DEBUG(out) << "[LogManager] Loglevel set to \"" << verbosity << "\"\n";
+    LOG_DEBUG(out) << "[LogManager] Loglevel set to \"" << verbosity << "\"" << std::endl;
   }
 
   if (showChannels) {
@@ -239,18 +240,18 @@ LogManager::init()
   // set channel log levels
   if (channelLevel) {
     
-    LOG_DEBUG(out) << "[LogManager] " << channelLevel.getLongParam() << " command-line option detected\n";
+    LOG_DEBUG(out) << "[LogManager] " << channelLevel.getLongParam() << " command-line option detected" << std::endl;
 
     std::string channelLevels = channelLevel;
 
     while (channelLevels.length() > 0) {
 
       size_t pos_eq = channelLevels.find_first_of("=");
-      LOG_ALL(out) << "[LogManager] Found '=' at " << pos_eq << "\n";
+      LOG_ALL(out) << "[LogManager] Found '=' at " << pos_eq << std::endl;
       if (pos_eq == std::string::npos) {
-        LOG_ERROR(out) << "[LogManager] Invalid " << channelLevel.getLongParam() << " syntax.\n";
+        LOG_ERROR(out) << "[LogManager] Invalid " << channelLevel.getLongParam() << " syntax." << std::endl;
         util::ProgramOptions::printUsage();
-        throw "[LogManager] Invalid command line syntax";
+        BOOST_THROW_EXCEPTION(UsageError() << error_message("[LogManager] Invalid command line syntax"));
       }
       std::string name = channelLevels.substr(0, pos_eq);
 
@@ -259,14 +260,14 @@ LogManager::init()
       std::string level;
       size_t pos_co = channelLevels.find_first_of(",");
       if (pos_co == std::string::npos) {
-        LOG_ALL(out) << "[LogManager] no further channels" << "\n";
+        LOG_ALL(out) << "[LogManager] no further channels" << std::endl;
         level = channelLevels.substr(0, channelLevels.length());
         channelLevels = "";
       } else {
-        LOG_ALL(out) << "[LogManager] ',' detected, there are further channels at " << pos_co << "\n";
+        LOG_ALL(out) << "[LogManager] ',' detected, there are further channels at " << pos_co << std::endl;
         level = channelLevels.substr(0, pos_co);
         channelLevels = channelLevels.substr(pos_co + 1, channelLevels.length() - 1);
-        LOG_ALL(out) << "[LogManager] remaining argument " << channelLevels << "\n";
+        LOG_ALL(out) << "[LogManager] remaining argument " << channelLevels << std::endl;
       }
 
       std::set<LogChannel*> channels = getChannels(name);
@@ -274,14 +275,14 @@ LogManager::init()
           (*i)->setLogLevel(getLogLevel(level));
 
       LOG_DEBUG(out) << "[LogManager] log-level of channel \"" << name
-                     << "\" set to \"" << level << "\"\n";
+                     << "\" set to \"" << level << "\"" << std::endl;
     }
   }
 
   // redirect channels to files
   if (channelToFile) {
 
-   LOG_DEBUG(out) << "[LogManager] " << channelToFile.getLongParam() << " command-line option detected\n";
+   LOG_DEBUG(out) << "[LogManager] " << channelToFile.getLongParam() << " command-line option detected" << std::endl;
 
     std::string channelFiles = channelToFile;
 
@@ -289,9 +290,9 @@ LogManager::init()
 
       size_t pos_eq = channelFiles.find_first_of("=");
       if (pos_eq == std::string::npos) {
-        LOG_ERROR(out) << "[LogManager] Invalid " << channelToFile.getLongParam() << " syntax.\n";
+        LOG_ERROR(out) << "[LogManager] Invalid " << channelToFile.getLongParam() << " syntax." << std::endl;
         util::ProgramOptions::printUsage();
-        throw "[LogManager] Invalid command line syntax";
+        BOOST_THROW_EXCEPTION(UsageError() << error_message("[LogManager] Invalid command line syntax"));
       }
       std::string name = channelFiles.substr(0, pos_eq);
 
@@ -312,7 +313,7 @@ LogManager::init()
           (*i)->redirectToFile(file);
 
       LOG_DEBUG(out) << "[LogManager] channel \"" << name
-                     << "\" redirected to file \"" << file << "\"\n";
+                     << "\" redirected to file \"" << file << "\"" << std::endl;
     }
  }
 }
@@ -343,9 +344,9 @@ LogManager::getLogLevel(std::string strLevel) {
     else if (strLevel == "none")
       return Quiet;
     else {
-      LOG_ERROR(out) << "[Logger] Unknown log level \"" << strLevel << "\".\n";
+      LOG_ERROR(out) << "[Logger] Unknown log level \"" << strLevel << "\"." << std::endl;
       util::ProgramOptions::printUsage();
-      throw "[Logger] Invalid log level";
+      BOOST_THROW_EXCEPTION(UsageError() << error_message("[Logger] Invalid log level"));
     }
 }
 
@@ -363,22 +364,22 @@ LogManager::getChannels(std::string channelName) {
   if (channels.size() > 0)
     return channels;
 
-  LOG_ERROR(out) << "[LogManager] No channel \"" << channelName << "\" available.\n";
+  LOG_ERROR(out) << "[LogManager] No channel \"" << channelName << "\" available." << std::endl;
   printChannels();
-  throw "[LogManager] Invalid channel name";
+  BOOST_THROW_EXCEPTION(UsageError() << error_message(std::string("[LogManager] Invalid channel name: ") + channelName));
 }
 
 void
 LogManager::printChannels() {
 
   if (LogChannel::getChannels()->size() == 0) {
-    LOG_USER(out) << "No output channels for this application available.\n";
+    LOG_USER(out) << "No output channels for this application available." << std::endl;
     return;
   }
 
   std::string prevChannelName = "";
 
-  LOG_USER(out) << "\nValid output channels are:\n\t";
+  LOG_USER(out) << std::endl << "Valid output channels are:" << std::endl << "\t";
   for (channel_it i = LogChannel::getChannels()->begin();
        i != LogChannel::getChannels()->end(); i++) {
     if ((*i)->getName() != prevChannelName) {
@@ -386,7 +387,7 @@ LogManager::printChannels() {
       prevChannelName = (*i)->getName();
     }
   }
-  LOG_USER(out) << "\n\n";
+  LOG_USER(out) << std::endl << std::endl;
 }
 
 } // namespace logger
