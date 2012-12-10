@@ -9,11 +9,15 @@ SignalHandler::init() {
 
 	struct sigaction sa;
 	sa.sa_handler = handle_signal;
+
 	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGSEGV);
+	sigaddset(&sa.sa_mask, SIGABRT);
 
 	sigaction(SIGSEGV, &sa, 0);
 	sigaction(SIGUSR1, &sa, 0);
 	sigaction(SIGTERM, &sa, 0);
+	sigaction(SIGABRT, &sa, 0);
 }
 
 void
