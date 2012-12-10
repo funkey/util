@@ -1,70 +1,113 @@
+#include <sys/prctl.h>
+#include <sys/wait.h>
+
 #include <boost/lexical_cast.hpp>
 
+#include "Logger.h"
 #include "demangle.h"
 #include "exceptions.h"
 
+logger::LogChannel tracelog("tracelog", "[trace] ");
+
 stack_trace_::stack_trace_() {
 
-	void*  stack[20];
-	size_t size;
+	std::string programName = get_program_name();
+	std::string pid         = get_pid();
 
-	size = backtrace(stack, 20);
+	_stack_trace.push_back(std::string("[trace] back trace for ") + programName + " (" + pid + "):");
 
-	char** symbols = backtrace_symbols(stack, size);
+	// create a pipe to read gdb's output
+	int pipefds[2];
+	pipe(pipefds);
 
-	if (!symbols)
-		return;
+	// create a pipe to be used as a barrier
+	int barrierfds[2];
+	pipe(barrierfds);
 
-	_stack_trace.push_back(std::string("[trace] back trace:"));
+	// fork
+	int childPid = fork();
 
-	/* skip first stack frame (points here) */
-	for (int i = 1; i < size; i++) {
+	// child:
+	if (!childPid) {
 
-		char* begin_name;
+		LOG_ALL(tracelog) << "[child] waiting for parent process to allow attaching" << std::endl;
 
-		// find beginning of function name part in symbol
-		// ./module(function+0x15c) [0x8048a6d]
-		for (begin_name = symbols[i]; *begin_name && *begin_name != '('; begin_name++);
+		// close writing end of barrier pipe
+		close(barrierfds[1]);
 
-		// extract function name only
-		std::string funname;
+		// wait until parent closes barrier pipe
+		char buf[1];
+		while (read(barrierfds[0], buf, sizeof(buf)) > 0)
+			LOG_ALL(tracelog) << "[child] " << buf[0] << std::endl;
 
-		// could we find a '('?
-		if (*begin_name) {
+		LOG_ALL(tracelog) << "[child] parent process closed barrier pipe, preparing gdb invocation" << std::endl;
 
-			// if we found a '(', the name starts right after it
-			begin_name++;
+		// close barrier pipe
+		close(barrierfds[0]);
 
-			for (; *begin_name && *begin_name != '+'; begin_name++)
-				funname += *begin_name;
+		// close reading end of output pipe
+		close(pipefds[0]);
 
-			// could we find a '+'?
-			if (!*begin_name)
-				funname = "";
-		}
+		// redirect stdout and stderr to output pipe
+		dup2(pipefds[1], 1);
+		dup2(pipefds[1], 2);
 
-		_stack_trace.push_back("[trace] #" + boost::lexical_cast<std::string>(i) + ": " + demangle(funname.c_str()));
+		// close writing end of pipe (_we_ don't need it any longer)
+		close(pipefds[1]);
 
-		char command[256];
-		sprintf(command, "addr2line %p -e %s", stack[i], get_program_name().c_str());
-		FILE* pipe = popen(command, "r");
+		// start gdb
+		execlp("gdb", "gdb", "--batch", "-n", "-ex", "bt full", programName.c_str(), pid.c_str(), NULL);
 
-		if (pipe) {
+	// parent:
+	} else {
 
-			_stack_trace.push_back("[trace] in file: ");
-			char line[1024];
-			while (fgets(line, 1024, pipe))
-				_stack_trace.back() += line;
+		LOG_ALL(tracelog) << "[parent] allowing child to attach" << std::endl;
 
-			// remove the newline character from the end of the line
-			if (_stack_trace.back().size() > 0)
-				_stack_trace.back().erase(_stack_trace.back().size() - 1);
-		}
+		// allow our child process to attach
+		prctl(PR_SET_PTRACER, childPid, 0, 0, 0);
 
-		pclose(pipe);
+		LOG_ALL(tracelog) << "[parent] closing barrier pipe" << std::endl;
+
+		// close barrier pipe to let child proceed
+		close(barrierfds[0]);
+		close(barrierfds[1]);
+
+		LOG_ALL(tracelog) << "[parent] barrier pipe closed" << std::endl;
+
+		// close the write end of pipe
+		close(pipefds[1]);
+
+		// capture child's output
+		std::string output;
+
+		// read the whole output of gdb
+		char   buf[1];
+		size_t n;
+		while (n = read(pipefds[0], buf, sizeof(buf)))
+			output += std::string(buf, n);
+
+		LOG_ALL(tracelog) << "[parent] end of pipe; I read: " << std::endl << output << std::endl;
+
+		// split it at newline characters
+		std::stringstream oss(output);
+		std::string       line;
+
+		// ignore every line until '#0 ...'
+		while (std::getline(oss, line) && (line.size() < 2 || line[0] != '#' && line[1] != '0'));
+
+		// copy remaining lines to stack trace
+		do {
+
+			if (line.size() > 0 && line[0] != '\n')
+				_stack_trace.push_back(std::string("[trace] ") + line);
+
+		} while (std::getline(oss, line));
+
+		// wait for the child to finish
+		waitpid(childPid, NULL, 0);
 	}
 
-	free(symbols);
+	return;
 }
 
 const std::vector<std::string>&
@@ -80,6 +123,12 @@ stack_trace_::get_program_name() {
 		initialise_program_name();
 
 	return _program_name;
+}
+
+std::string
+stack_trace_::get_pid() {
+
+	return boost::lexical_cast<std::string>(getpid());
 }
 
 void

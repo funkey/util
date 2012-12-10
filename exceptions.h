@@ -39,6 +39,8 @@ private:
 
 	const std::string& get_program_name();
 
+	std::string get_pid();
+
 	void initialise_program_name();
 
 	std::vector<std::string> _stack_trace;
