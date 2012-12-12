@@ -190,18 +190,19 @@ LogFileManager::openFile(std::string filename) {
 
 // Implementation - Logger
 
+boost::mutex Logger::FlushMutex;
+
 Logger::Logger(std::streambuf* streamBuffer, const std::string& prefix) :
   std::ostream(streamBuffer),
-  _prefix(prefix),
-  _printPrefix(true)
+  _prefix(prefix)
 {
   // Empty
 }
 
 Logger::Logger(Logger& logger, const std::string& prefix) :
   std::ostream(logger.rdbuf()),
-  _prefix(prefix),
-  _printPrefix(true) {
+  _prefix(prefix)
+{
   // Empty
 }
 

@@ -16,6 +16,7 @@
 #include<map>
 
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 
 #define LOG_ERROR(channel) if (channel.getLogLevel() >= logger::Error) channel(logger::error)
 #define LOG_USER(channel)  if (channel.getLogLevel() >= logger::User)  channel(logger::user)
@@ -52,10 +53,7 @@ public:
 	template <typename T>
 	Logger& operator<<(T* t) {
 
-		printPrefix();
-
-		std::ostream& s = *this;
-		s << t;
+		getBuffer() << t;
 
 		return *this;
 	}
@@ -63,61 +61,80 @@ public:
 	template <typename T>
 	Logger& operator<<(const T& t) {
 
-		printPrefix();
-
-		std::ostream& s = *this;
-		s << t;
+		getBuffer() << t;
 
 		return *this;
 	}
 
 	Logger& operator<<(std::ostream&(*fp)(std::ostream&)) {
 
-		printPrefix();
-
-		std::ostream::operator<<(fp);
+		getBuffer() << fp;
 
 		// the next operator<< will cause the prefix to be printed after a 
 		// newline
-		if (fp == &std::endl<std::ostream::char_type, std::ostream::traits_type>)
-			_printPrefix = true;
+		if (fp == &std::endl<std::ostream::char_type, std::ostream::traits_type>) {
+
+			{
+				boost::mutex::scoped_lock lock(FlushMutex);
+
+				std::ostream& s = *this;
+
+				s << getBuffer().str();
+				s << std::flush;
+			}
+
+			clearBuffer();
+		}
 
 		return *this;
 	}
 
 	Logger& operator<<(std::ios&(*fp)(std::ios&)) {
 
-		printPrefix();
-
-		std::ostream::operator<<(fp);
+		getBuffer() << fp;
 
 		return *this;
 	}
 
 	Logger& operator<<(std::ios_base&(*fp)(std::ios_base&)) {
 
-		printPrefix();
-
-		std::ostream::operator<<(fp);
+		getBuffer() << fp;
 
 		return *this;
 	}
 
 private:
 
-	void printPrefix() {
+	std::stringstream& getBuffer() {
 
-		if (_printPrefix) {
+		if (_buffer.get() == 0) {
 
-			_printPrefix = false;
-			*this << boost::this_thread::get_id() << " " << _prefix;
+			_buffer.reset(new std::stringstream());
+			clearBuffer();
 		}
+
+		return (*_buffer);
+	}
+
+	void clearBuffer() {
+
+		// fill the buffer with the prefix
+		getBuffer().str("");
+		getBuffer() << getPrefix();
+	}
+
+	std::string getPrefix() {
+
+		return boost::lexical_cast<std::string>(boost::this_thread::get_id()) + " " + _prefix;
 	}
 
 	// reference to the owning LogChannel's prefix
 	const std::string& _prefix;
 
-	bool _printPrefix;
+	// thread local buffer
+	boost::thread_specific_ptr<std::stringstream> _buffer;
+
+	static boost::mutex FlushMutex;
 };
 
 class LogFileManager {
