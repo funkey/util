@@ -75,6 +75,21 @@ struct rect {
 		return true;
 	}
 
+	rect<T> intersection(const rect<T>& other) const {
+
+		rect<T> result(0, 0, 0, 0);
+
+		if (!intersects(other))
+			return result;
+
+		result.minX = std::max(minX, other.minX);
+		result.minY = std::max(minY, other.minY);
+		result.maxX = std::min(maxX, other.maxX);
+		result.maxY = std::min(maxY, other.maxY);
+
+		return result;
+	}
+
 	bool contains(const point<T>& point) const {
 
 		return minX <= point.x && minY <= point.y && maxX > point.x && maxY > point.y;
