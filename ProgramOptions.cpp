@@ -27,7 +27,7 @@ ProgramOption help(
 		_short_name = "h",
 		_description_text = "Prints this help.");
 
-ProgramOption configFile(
+ProgramOption optionConfigFile(
 		_long_name = "config",
 		_short_name = "c",
 		_description_text = "Path to a configuration file to use instead of the default [name_of_binary].conf.",
@@ -82,25 +82,29 @@ ProgramOptions::init(int argc, char** argv) {
 			"Include another config file.");
 
 	// if config file is set, read from it as well
-	if (configFile) {
+	if (optionConfigFile) {
 
-		std::string configFileName = configFile;
+		boost::filesystem::path configFile(optionConfigFile.as<std::string>());
 
-		std::cout << "reading configuration from file " << configFileName << std::endl;
+		std::cout << "reading configuration from file " << configFile << std::endl;
 
-		readFromFile(configFileName, values);
+		if (boost::filesystem::exists(configFile))
+			readFromFile(configFile, values);
+		else
+			std::cerr << "ERROR: configuration file " << configFile << " does not exist" << std::endl;
 
 	// otherwise, try to read from [binary_name].conf
 	} else {
 
-		std::cout << "trying to read configuration from file " << BinaryName << ".conf" << std::endl;
+		boost::filesystem::path defaultConfigFile(BinaryName + ".conf");
 
-		readFromFile(BinaryName + ".conf", values);
+		if (boost::filesystem::exists(defaultConfigFile))
+			readFromFile(defaultConfigFile, values);
 	}
 }
 
 void
-ProgramOptions::readFromFile(std::string filename, boost::program_options::variables_map& values) {
+ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_options::variables_map& values) {
 
 	unsigned int beginNewInclude;
 
@@ -109,13 +113,14 @@ ProgramOptions::readFromFile(std::string filename, boost::program_options::varia
 	else
 		beginNewInclude = 0;
 
-	std::cout << "reading configuration from file " << filename << std::endl;
+	std::cout << "reading configuration from file " << configFile << std::endl;
 
-	std::ifstream config(filename.c_str());
+	std::ifstream config(configFile.string().c_str());
 
 	if (!config.good()) {
 
-		std::cerr << "error opening config file: " << filename << std::endl;
+		std::cerr << "ERROR: can't open config file: " << configFile << std::endl;
+		return;
 	}
 
 	// read from the config file
@@ -139,15 +144,22 @@ ProgramOptions::readFromFile(std::string filename, boost::program_options::varia
 	// are there new includes?
 	if (endNewInclude > beginNewInclude) {
 
-		std::cout << "including configuration from " << (endNewInclude - beginNewInclude) << " files" << std::endl;
-
 		// include other config file back to front, such that the last one 
 		// specified has precedence
 		for (int i = (int)endNewInclude - 1; i >= (int)beginNewInclude; i--) {
 
 			std::string includeFileName = values["include"].as<std::vector<std::string> >()[i];
 
-			readFromFile(includeFileName, values);
+			// append include file name to current config file's directory
+			boost::filesystem::path includeFile = configFile.parent_path() / includeFileName;
+
+			if (!boost::filesystem::exists(includeFile)) {
+
+				std::cerr << "ERROR: include file " << includeFile << " does not exist" << std::endl;
+				continue;
+			}
+
+			readFromFile(includeFile, values);
 		}
 	}
 }

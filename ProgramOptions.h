@@ -7,6 +7,7 @@
 #include <set>
 #include <map>
 
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/parameter.hpp>
 #include <boost/program_options.hpp>
@@ -51,7 +52,7 @@ private:
 	
 	ProgramOptions() {};
 
-	static void readFromFile(std::string filename, boost::program_options::variables_map& values);
+	static void readFromFile(boost::filesystem::path configFile, boost::program_options::variables_map& values);
 
 	static std::set<program_option_impl*, is_less>* Options;
 
