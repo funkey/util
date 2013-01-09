@@ -55,8 +55,6 @@ ProgramOptions::init(int argc, char** argv) {
 
 	// get all options
 	boost::program_options::variables_map values;
-	std::string                                  name;
-	boost::program_options::options_description* module;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, *CommandLineOptions), values);
 	boost::program_options::notify(values);
 
@@ -77,6 +75,12 @@ ProgramOptions::init(int argc, char** argv) {
 		exit(0);
 	}
 
+	// add the include option
+	ConfigFileOptions->add_options()
+			("include",
+			boost::program_options::value<std::vector<std::string> >()->composing(),
+			"Include another config file.");
+
 	// if config file is set, read from it as well
 	if (configFile) {
 
@@ -84,20 +88,38 @@ ProgramOptions::init(int argc, char** argv) {
 
 		std::cout << "reading configuration from file " << configFileName << std::endl;
 
-		std::ifstream config(configFileName.c_str());
-
-		boost::program_options::store(boost::program_options::parse_config_file(config, *ConfigFileOptions), values);
+		readFromFile(configFileName, values);
 
 	// otherwise, try to read from [binary_name].conf
 	} else {
 
 		std::cout << "trying to read configuration from file " << BinaryName << ".conf" << std::endl;
 
-		std::ifstream config((BinaryName + ".conf").c_str());
+		readFromFile(BinaryName + ".conf", values);
+	}
+}
 
-		boost::program_options::store(boost::program_options::parse_config_file(config, *ConfigFileOptions), values);
+void
+ProgramOptions::readFromFile(std::string filename, boost::program_options::variables_map& values) {
+
+	unsigned int beginNewInclude;
+
+	if (values.count("include"))
+		beginNewInclude = values["include"].as<std::vector<std::string> >().size();
+	else
+		beginNewInclude = 0;
+
+	std::cout << "reading configuration from file " << filename << std::endl;
+
+	std::ifstream config(filename.c_str());
+
+	if (!config.good()) {
+
+		std::cerr << "error opening config file: " << filename << std::endl;
 	}
 
+	// read from the config file
+	boost::program_options::store(boost::program_options::parse_config_file(config, *ConfigFileOptions), values);
 	boost::program_options::notify(values);
 
 	// update program option values
@@ -105,8 +127,28 @@ ProgramOptions::init(int argc, char** argv) {
 
 		std::string module = (option->getModuleName() != "" ? option->getModuleName() + "." : "");
 
-		if (values.count(module + option->getLongParam()))
+		if (values.count(module + option->getLongParam())) {
+
+			std::cout << "found option " << (module + option->getLongParam()) << std::endl;
 			Values[option] = values[module + option->getLongParam()].as<std::string>();
+		}
+	}
+
+	unsigned int endNewInclude = values["include"].as<std::vector<std::string> >().size();
+
+	// are there new includes?
+	if (endNewInclude > beginNewInclude) {
+
+		std::cout << "including configuration from " << (endNewInclude - beginNewInclude) << " files" << std::endl;
+
+		// include other config file back to front, such that the last one 
+		// specified has precedence
+		for (int i = (int)endNewInclude - 1; i >= (int)beginNewInclude; i--) {
+
+			std::string includeFileName = values["include"].as<std::vector<std::string> >()[i];
+
+			readFromFile(includeFileName, values);
+		}
 	}
 }
 

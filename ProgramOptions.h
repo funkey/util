@@ -51,6 +51,8 @@ private:
 	
 	ProgramOptions() {};
 
+	static void readFromFile(std::string filename, boost::program_options::variables_map& values);
+
 	static std::set<program_option_impl*, is_less>* Options;
 
 	static std::set<std::string>* KnownLongParams;
