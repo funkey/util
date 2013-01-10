@@ -132,7 +132,14 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 
 		std::string module = (option->getModuleName() != "" ? option->getModuleName() + "." : "");
 
-		if (values.count(module + option->getLongParam())) {
+		// set without module part? (shortcut, only for command line arguments)
+		if (values.count(option->getLongParam())) {
+
+			std::cout << "found option " << option->getLongParam() << " as shorthand for " << (module + option->getLongParam()) << std::endl;
+			Values[option] = values[option->getLongParam()].as<std::string>();
+
+		// set with module part?
+		} else if (values.count(module + option->getLongParam())) {
 
 			std::cout << "found option " << (module + option->getLongParam()) << std::endl;
 			Values[option] = values[module + option->getLongParam()].as<std::string>();
@@ -387,10 +394,10 @@ ProgramOptions::printUsage() {
 			"  [Module]\n" +
 			"  option=value\n" +
 			"\n" +
-			"Command line arguments overwrite config file settings. If the name " +
-			"of an option is unique, its module part may be omitted on the command " +
-			"line. Short versions of options are available for the command line as " +
-			"shown below.\n" +
+			"Command line arguments overwrite config file settings. The module part " +
+			"of an option may be omitted on the command line. In this case, all options " +
+			"with that name in all modules are set. Short versions of options are " +
+			"available for the command line as shown below.\n" +
 			"\n";
 
 	// get tty width:
