@@ -139,7 +139,10 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 		}
 	}
 
-	unsigned int endNewInclude = values["include"].as<std::vector<std::string> >().size();
+	unsigned int endNewInclude = beginNewInclude;
+
+	if(values.count("include"))
+		endNewInclude = values["include"].as<std::vector<std::string> >().size();
 
 	// are there new includes?
 	if (endNewInclude > beginNewInclude) {
