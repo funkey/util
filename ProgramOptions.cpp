@@ -86,8 +86,6 @@ ProgramOptions::init(int argc, char** argv) {
 
 		boost::filesystem::path configFile(optionConfigFile.as<std::string>());
 
-		std::cout << "reading configuration from file " << configFile << std::endl;
-
 		if (boost::filesystem::exists(configFile))
 			readFromFile(configFile, values);
 		else
@@ -113,8 +111,6 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 	else
 		beginNewInclude = 0;
 
-	std::cout << "reading configuration from file " << configFile << std::endl;
-
 	std::ifstream config(configFile.string().c_str());
 
 	if (!config.good()) {
@@ -135,13 +131,11 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 		// set without module part? (shortcut, only for command line arguments)
 		if (values.count(option->getLongParam())) {
 
-			std::cout << "found option " << option->getLongParam() << " as shorthand for " << (module + option->getLongParam()) << std::endl;
 			Values[option] = values[option->getLongParam()].as<std::string>();
 
 		// set with module part?
 		} else if (values.count(module + option->getLongParam())) {
 
-			std::cout << "found option " << (module + option->getLongParam()) << std::endl;
 			Values[option] = values[module + option->getLongParam()].as<std::string>();
 		}
 	}
