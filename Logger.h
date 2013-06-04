@@ -18,10 +18,19 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <config.h>
+
 #define LOG_ERROR(channel) if (channel.getLogLevel() >= logger::Error) channel(logger::error)
 #define LOG_USER(channel)  if (channel.getLogLevel() >= logger::User)  channel(logger::user)
+
+#ifdef ENABLE_DEBUG_LOGGING
 #define LOG_DEBUG(channel) if (channel.getLogLevel() >= logger::Debug) channel(logger::debug)
 #define LOG_ALL(channel)   if (channel.getLogLevel() >= logger::All)   channel(logger::all)
+#else
+#define LOG_DEBUG(channel) if (false) channel(logger::debug)
+#define LOG_ALL(channel)   if (false) channel(logger::all)
+#endif
+
 
 namespace logger {
 

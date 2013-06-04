@@ -4,3 +4,5 @@ file(GLOB utilfiles
 
 # this is a library
 add_library(util ${utilfiles})
+
+option(ENABLE_DEBUG_LOGGING "Enable the 'debug' and 'all' log-channels" TRUE)
