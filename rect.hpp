@@ -54,6 +54,16 @@ struct rect {
 		return point<T>(maxX, maxY);
 	}
 
+	point<T> upperRight() const {
+
+		return point<T>(maxX, minY);
+	}
+
+	point<T> lowerLeft() const {
+
+		return point<T>(minX, maxY);
+	}
+
 	point<T> center() const {
 
 		return point<T>((minX + maxX)/2, (minY + maxY)/2);
