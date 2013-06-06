@@ -219,9 +219,9 @@ util::rect<T> operator*(const util::rect<T>& p, const S& s) {
 }
 
 template <typename T, typename S>
-util::rect<T> operator*(const S& s, const util::rect<T>& p) {
+util::rect<S> operator*(const S& s, const util::rect<T>& p) {
 
-	util::rect<T> result(p);
+	util::rect<S> result(p);
 
 	return result *= s;
 }
