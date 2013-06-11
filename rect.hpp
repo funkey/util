@@ -71,15 +71,19 @@ struct rect {
 
 	bool intersects(const rect<T>& other) const {
 
+		// empty rectangles do not intersect
+		if (area()*other.area() == 0)
+			return false;
+
 		// two non-intersecting rectanlges are separated by a line parallel to
 		// either x or y
 
 		// separated by x-line
-		if (maxX < other.minX || minX > other.maxX)
+		if (maxX <= other.minX || minX >= other.maxX)
 			return false;
 
 		// separated by y-line
-		if (maxY < other.minY || minY > other.maxY)
+		if (maxY <= other.minY || minY >= other.maxY)
 			return false;
 
 		return true;
