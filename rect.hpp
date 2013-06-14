@@ -109,6 +109,22 @@ struct rect {
 		return minX <= point.x && minY <= point.y && maxX > point.x && maxY > point.y;
 	}
 
+	bool contains(const rect<T>& other) const {
+
+		return minX <= other.minX && minY <= other.minY && maxX >= other.maxX && maxY >= other.maxY;
+	}
+
+	/**
+	 * Extend this rect, such that it fits the given point.
+	 */
+	void fit(const point<T>& point) {
+
+		minX = std::min(point.x, minX);
+		minY = std::min(point.y, minY);
+		maxX = std::max(point.x, maxX);
+		maxY = std::max(point.y, maxY);
+	}
+
 	T area() const {
 
 		return width()*height();
