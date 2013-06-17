@@ -130,6 +130,11 @@ struct rect {
 		return width()*height();
 	}
 
+	bool isZero() const {
+
+		return minX == 0 && minY == 0 && maxX == 0 && maxY == 0;
+	}
+
 	template <typename S>
 	rect<T>& operator+=(const point<S>& other) {
 
