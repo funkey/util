@@ -9,6 +9,7 @@ SignalHandler::init() {
 
 	struct sigaction sa;
 	sa.sa_handler = handle_signal;
+	sa.sa_flags   = SA_ONESHOT | SA_ONSTACK;
 
 	sigemptyset(&sa.sa_mask);
 	sigaddset(&sa.sa_mask, SIGSEGV);
