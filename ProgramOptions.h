@@ -33,6 +33,7 @@ BOOST_PARAMETER_NAME(short_name)
 BOOST_PARAMETER_NAME(description_text)
 BOOST_PARAMETER_NAME(argument_sketch)
 BOOST_PARAMETER_NAME(default_value)
+BOOST_PARAMETER_NAME(is_positional)
 
 class ProgramOptions {
 
@@ -62,6 +63,8 @@ private:
 
 	static boost::program_options::options_description* CommandLineOptions;
 
+	static boost::program_options::positional_options_description* Positional;
+
 	static boost::program_options::options_description* ConfigFileOptions;
 
 	static std::string	BinaryName;
@@ -79,7 +82,8 @@ public:
 		_shortParam(args[_short_name | ""]),
 		_description(args[_description_text | ""]),
 		_argumentSketch(args[_argument_sketch | ""]),
-		_defaultValue(boost::lexical_cast<std::string>(args[_default_value | "0"])) {
+		_defaultValue(boost::lexical_cast<std::string>(args[_default_value | "0"])),
+		_isPositional(args[_is_positional | false]) {
 
 		ProgramOptions::addProgramOption(this); 
 	}
@@ -95,6 +99,8 @@ public:
 	std::string getArgumentSketch();
 
 	std::string getDefaultValue() const;
+
+	bool isPositional();
 
 	/**
 	 * Defines a lexicographic order on command line
@@ -156,6 +162,8 @@ private:
 	std::string _argumentSketch;
 
 	std::string _defaultValue;
+
+	bool _isPositional;
 };
 
 class ProgramOption : public program_option_impl {

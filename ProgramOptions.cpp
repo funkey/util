@@ -14,11 +14,12 @@
 
 namespace util {
 
-std::set<program_option_impl*, is_less>*          ProgramOptions::Options = 0;
-std::set<std::string>*                            ProgramOptions::KnownLongParams = 0;
-std::map<const program_option_impl*, std::string> ProgramOptions::Values;
-boost::program_options::options_description*      ProgramOptions::CommandLineOptions = 0;
-boost::program_options::options_description*      ProgramOptions::ConfigFileOptions  = 0;
+std::set<program_option_impl*, is_less>*                ProgramOptions::Options = 0;
+std::set<std::string>*                                  ProgramOptions::KnownLongParams = 0;
+std::map<const program_option_impl*, std::string>       ProgramOptions::Values;
+boost::program_options::options_description*            ProgramOptions::CommandLineOptions = 0;
+boost::program_options::positional_options_description* ProgramOptions::Positional = 0;
+boost::program_options::options_description*            ProgramOptions::ConfigFileOptions  = 0;
 
 std::string ProgramOptions::BinaryName = "";
 
@@ -55,7 +56,7 @@ ProgramOptions::init(int argc, char** argv) {
 
 	// get all options
 	boost::program_options::variables_map values;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, *CommandLineOptions), values);
+	boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(*CommandLineOptions).positional(*Positional).run(), values);
 	boost::program_options::notify(values);
 
 	// set initial program option values
@@ -195,6 +196,9 @@ ProgramOptions::addProgramOption(program_option_impl* option) {
 	if (CommandLineOptions == 0)
 		CommandLineOptions = new boost::program_options::options_description("command line options");
 
+	if (Positional == 0)
+		Positional = new boost::program_options::positional_options_description();
+
 	if (ConfigFileOptions == 0)
 		ConfigFileOptions = new boost::program_options::options_description("config file options");
 
@@ -224,6 +228,10 @@ ProgramOptions::addProgramOption(program_option_impl* option) {
 				(option->getLongParam().c_str(),
 				boost::program_options::value<std::string>()->implicit_value("true"),
 				"");
+
+	// set it as the positional program option, if desired
+	if (option->isPositional())
+		Positional->add((moduleName + option->getLongParam()).c_str(), -1);
 
 	Options->insert(option);
 	KnownLongParams->insert(option->getLongParam());
@@ -444,6 +452,11 @@ program_option_impl::getArgumentSketch() {
 std::string
 program_option_impl::getDefaultValue() const {
 	return _defaultValue;
+}
+
+bool
+program_option_impl::isPositional() {
+	return _isPositional;
 }
 
 std::ostream&
