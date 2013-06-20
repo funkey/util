@@ -18,11 +18,15 @@ stack_trace_::stack_trace_() {
 
 	// create a pipe to read gdb's output
 	int pipefds[2];
-	pipe(pipefds);
+	int res = pipe(pipefds);
+	if (res < 0)
+		return;
 
 	// create a pipe to be used as a barrier
 	int barrierfds[2];
-	pipe(barrierfds);
+	res = pipe(barrierfds);
+	if (res < 0)
+		return;
 
 	// fork
 	int childPid = fork();
