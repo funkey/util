@@ -10,6 +10,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <util/foreach.h>
+#include <config.h>
 #include "ProgramOptions.h"
 
 namespace util {
@@ -97,8 +98,21 @@ ProgramOptions::init(int argc, char** argv) {
 
 		boost::filesystem::path defaultConfigFile(BinaryName + ".conf");
 
-		if (boost::filesystem::exists(defaultConfigFile))
+		if (boost::filesystem::exists(defaultConfigFile)) {
+
 			readFromFile(defaultConfigFile, values);
+		}
+#if defined(SYSTEM_LINUX) || defined(SYSTEM_FREEBSD)
+		else {
+
+			// if this does not exist, look in the home directory
+			char const* home = getenv("HOME");
+			boost::filesystem::path homeConfigFile(std::string(home) + "/.config/" + BinaryName + "/config");
+
+			if (boost::filesystem::exists(homeConfigFile))
+				readFromFile(homeConfigFile, values);
+		}
+#endif
 	}
 }
 
