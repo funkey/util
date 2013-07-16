@@ -125,6 +125,17 @@ struct rect {
 		maxY = std::max(point.y, maxY);
 	}
 
+	/**
+	 * Extend this rect, such that it fits the given rect.
+	 */
+	void fit(const rect<T>& rect) {
+
+		minX = std::min(rect.minX, minX);
+		minY = std::min(rect.minY, minY);
+		maxX = std::max(rect.maxX, maxX);
+		maxY = std::max(rect.maxY, maxY);
+	}
+
 	T area() const {
 
 		return width()*height();
