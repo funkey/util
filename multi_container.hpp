@@ -1,5 +1,7 @@
 #include <vector>
 #include <algorithm>
+#include <boost/static_assert.hpp>
+
 #include "typelist.h"
 
 namespace detail {
@@ -23,7 +25,7 @@ protected:
 	/**
 	 * Add an element of type Type.
 	 */
-	void add(Type& t) { _elems.push_back(t); }
+	void add(const Type& t) { _elems.push_back(t); }
 
 	/**
 	 * Call functor with every element in our container and ask our parent to do 
@@ -50,7 +52,7 @@ public:
 
 protected:
 
-	void add(TypeNone& t) {}
+	void add(const TypeNone&) {}
 
 	template <typename F>
 	void for_each(F) {}
@@ -100,10 +102,27 @@ public:
 	 * Add an element of type T to its corresponding collection.
 	 */
 	template <typename T>
-	void add(T& t) {
+	void add(const T& t) {
 
 		typedef typename detail::GetMultiContainerImplType<T, typename Types::Head, typename Types::Tail>::Value TContainerType;
 		TContainerType::add(t);
+	}
+
+	/**
+	 * Get an element of type T by its index. Indices range from 0 until 
+	 * (excluding) size<T>().
+	 */
+	template <typename T>
+	T& get(unsigned int i) {
+	
+		typedef typename detail::GetMultiContainerImplType<T, typename Types::Head, typename Types::Tail>::Value TContainerType;
+		return TContainerType::_elems[i];
+	}
+	template <typename T>
+	const T& get(unsigned int i) const {
+	
+		typedef typename detail::GetMultiContainerImplType<T, typename Types::Head, typename Types::Tail>::Value TContainerType;
+		return TContainerType::_elems[i];
 	}
 
 	/**
@@ -115,12 +134,28 @@ public:
 		typedef typename detail::GetMultiContainerImplType<T, typename Types::Head, typename Types::Tail>::Value TContainerType;
 		return TContainerType::_elems;
 	}
+	template <typename T>
+	const std::vector<T>& get() const {
+	
+		typedef typename detail::GetMultiContainerImplType<T, typename Types::Head, typename Types::Tail>::Value TContainerType;
+		return TContainerType::_elems;
+	}
 
 	/**
 	 * Get the number of elements of type T in this container.
 	 */
-	template<typename T>
-	unsigned int size() { return get<T>().size(); }
+	template <typename T>
+	unsigned int size() const { return get<T>().size(); }
+
+	/**
+	 * Delete all entries of type T.
+	 */
+	template <typename T>
+	void clear() {
+
+		typedef typename detail::GetMultiContainerImplType<T, typename Types::Head, typename Types::Tail>::Value TContainerType;
+		TContainerType::_elems.clear();
+	}
 
 	/**
 	 * Pass each element of each type to the given functor.
