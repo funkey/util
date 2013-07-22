@@ -1,3 +1,6 @@
+#ifndef UTIL_MULTI_CONTAINER_H__
+#define UTIL_MULTI_CONTAINER_H__
+
 #include <vector>
 #include <algorithm>
 #include <boost/static_assert.hpp>
@@ -163,3 +166,7 @@ public:
 	template<typename F>
 	void for_each(F f) { ImplType::for_each(f); }
 };
+
+
+#endif // UTIL_MULTI_CONTAINER_H__
+
