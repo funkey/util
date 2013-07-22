@@ -5,8 +5,9 @@
 namespace detail {
 
 /**
- * MultiContainer base class for the type Type (=Head). A MultiContainer will be 
- * composed of several such class templates, one for each type it should hold.
+ * multi_container base class for the type Type (=Head). A multi_container will 
+ * be composed of several such class templates, one for each type it should 
+ * hold.
  */
 template <typename Head, typename Tail>
 class MultiContainerImpl : public MultiContainerImpl<typename Tail::Head, typename Tail::Tail> {
@@ -57,7 +58,7 @@ protected:
 
 /**
  * Metafunction to get the type of the MultiContainerImpl that holds elements of 
- * the type Type, as created by a MultiContainer with the typelist specified by 
+ * the type Type, as created by a multi_container with the typelist specified by 
  * TypesHead and TypesTail.
  */
 template <typename Type, typename TypesHead, typename TypesTail>
@@ -86,7 +87,7 @@ struct GetMultiContainerImplType<Type, TypeNone, TypeNone> {
  * types are given in a typelist as a template argument.
  */
 template <typename Types>
-class MultiContainer :
+class multi_container :
 		public detail::MultiContainerImpl<
 				typename Types::Head,
 				typename Types::Tail> {
