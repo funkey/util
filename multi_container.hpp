@@ -31,6 +31,11 @@ protected:
 	void add(const Type& t) { _elems.push_back(t); }
 
 	/**
+	 * Get the number of elements in this and all higher objects.
+	 */
+	unsigned int size() const { return _elems.size() + Parent::size(); }
+
+	/**
 	 * Call functor with every element in our container and ask our parent to do 
 	 * the same afterwards.
 	 */
@@ -56,6 +61,8 @@ public:
 protected:
 
 	void add(const TypeNone&) {}
+
+	unsigned int size() const { return 0; }
 
 	template <typename F>
 	void for_each(F) {}
@@ -149,6 +156,11 @@ public:
 	 */
 	template <typename T>
 	unsigned int size() const { return get<T>().size(); }
+
+	/**
+	 * Get the total number of elements in this container.
+	 */
+	unsigned int size() const { return ImplType::size(); }
 
 	/**
 	 * Delete all entries of type T.
