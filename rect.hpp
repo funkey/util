@@ -69,10 +69,11 @@ struct rect {
 		return point<T>((minX + maxX)/2, (minY + maxY)/2);
 	}
 
-	bool intersects(const rect<T>& other) const {
+	template <typename S>
+	bool intersects(const rect<S>& other) const {
 
 		// empty rectangles do not intersect
-		if (area()*other.area() == 0)
+		if (area() <= 0 || other.area() <= 0)
 			return false;
 
 		// two non-intersecting rectanlges are separated by a line parallel to
@@ -89,7 +90,8 @@ struct rect {
 		return true;
 	}
 
-	rect<T> intersection(const rect<T>& other) const {
+	template <typename S>
+	rect<T> intersection(const rect<S>& other) const {
 
 		rect<T> result(0, 0, 0, 0);
 
