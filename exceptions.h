@@ -65,5 +65,11 @@ typedef boost::error_info<struct tag_stack_trace, stack_trace_>  stack_trace;
 typedef boost::error_info<struct tag_mismatch_size1, int> mismatch_size1;
 typedef boost::error_info<struct tag_mismatch_size2, int> mismatch_size2;
 
+/*
+ * HELPER FUNCTIONS
+ */
+
+void handleException(boost::exception& e, std::ostream& out);
+
 #endif // EXCEPTIONS_H__
 

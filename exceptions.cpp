@@ -153,3 +153,22 @@ stack_trace_::initialise_program_name() {
 	for (int i = 0; i < size; i++)
 		_program_name += name[i];
 }
+
+void handleException(boost::exception& e, std::ostream& out) {
+
+	out << "caught exception: ";
+
+	if (boost::get_error_info<error_message>(e))
+		out << *boost::get_error_info<error_message>(e);
+
+	out << std::endl;
+
+	out << "stack trace:" << std::endl;
+
+	if (boost::get_error_info<stack_trace>(e))
+		out << *boost::get_error_info<stack_trace>(e);
+
+	out << std::endl;
+
+	exit(-1);
+}
