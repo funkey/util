@@ -87,7 +87,7 @@ stack_trace_::stack_trace_() {
 		// read the whole output of gdb
 		char   buf[1];
 		size_t n;
-		while (n = read(pipefds[0], buf, sizeof(buf)))
+		while ((n = read(pipefds[0], buf, sizeof(buf))))
 			output += std::string(buf, n);
 
 		LOG_ALL(tracelog) << "[parent] end of pipe; I read: " << std::endl << output << std::endl;
@@ -97,7 +97,7 @@ stack_trace_::stack_trace_() {
 		std::string       line;
 
 		// ignore every line until '#0 ...'
-		while (std::getline(oss, line) && (line.size() < 2 || line[0] != '#' && line[1] != '0'));
+		while (std::getline(oss, line) && (line.size() < 2 || (line[0] != '#' && line[1] != '0')));
 
 		// copy remaining lines to stack trace
 		do {
