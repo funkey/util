@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include <hdf5.h>
 #include <H5Cpp.h>
 #include "hdf5_traits.h"
 
