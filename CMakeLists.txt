@@ -1,1 +1,1 @@
-define_module(utils LIBRARY LINKS boost)
+define_module(util LIBRARY LINKS boost INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/..)
