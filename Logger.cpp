@@ -11,9 +11,9 @@
 #include <string>
 #include <cstdlib>
 
-#include "ProgramOptions.h"
 #include "Logger.h"
 #include "exceptions.h"
+#include "ProgramOptions.h"
 
 namespace logger {
 
@@ -62,6 +62,14 @@ util::ProgramOption channelToFile(
 		"For a list of possible channels type "
 		"\"--show-log-channels\".",
 		util::_argument_sketch = "files");
+
+util::ProgramOption showChannelPrefix(
+		util::_module = "Logging",
+		util::_long_name = "show-channel-prefix",
+		util::_description_text =
+		"Show the thread id and channel prefix for every line of output."
+		"True by default.",
+		util::_default_value = true);
 
 Logger glutton(0, "");
 
@@ -194,7 +202,8 @@ boost::mutex Logger::FlushMutex;
 
 Logger::Logger(std::streambuf* streamBuffer, const std::string& prefix) :
   std::ostream(streamBuffer),
-  _prefix(prefix)
+  _prefix(prefix),
+  _showChannelPrefix(showChannelPrefix)
 {
   // Empty
 }

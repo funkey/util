@@ -127,9 +127,13 @@ private:
 
 	void clearBuffer() {
 
-		// fill the buffer with the prefix
 		getBuffer().str("");
-		getBuffer() << getPrefix();
+
+		if (_showChannelPrefix) {
+
+			// fill the buffer with the prefix
+			getBuffer() << getPrefix();
+		}
 	}
 
 	std::string getPrefix() {
@@ -139,6 +143,8 @@ private:
 
 	// reference to the owning LogChannel's prefix
 	const std::string& _prefix;
+
+	bool _showChannelPrefix;
 
 	// thread local buffer
 	boost::thread_specific_ptr<std::stringstream> _buffer;
