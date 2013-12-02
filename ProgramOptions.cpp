@@ -439,27 +439,27 @@ ProgramOptions::printUsage() {
 }
 
 std::string
-program_option_impl::getModuleName() {
+program_option_impl::getModuleName() const {
 	return _moduleName;
 }
 
 std::string
-program_option_impl::getLongParam() {
+program_option_impl::getLongParam() const {
 	return _longParam;
 }
 
 std::string
-program_option_impl::getShortParam() {
+program_option_impl::getShortParam() const {
 	return _shortParam;
 }
 
 std::string
-program_option_impl::getDescription() {
+program_option_impl::getDescription() const {
 	return _description;
 }
 
 std::string
-program_option_impl::getArgumentSketch() {
+program_option_impl::getArgumentSketch() const {
 	return _argumentSketch;
 }
 
@@ -469,7 +469,7 @@ program_option_impl::getDefaultValue() const {
 }
 
 bool
-program_option_impl::isPositional() {
+program_option_impl::isPositional() const {
 	return _isPositional;
 }
 

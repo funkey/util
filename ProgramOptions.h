@@ -88,19 +88,19 @@ public:
 		ProgramOptions::addProgramOption(this); 
 	}
 
-	std::string getModuleName();
+	std::string getModuleName() const;
 
-	std::string getLongParam();
+	std::string getLongParam() const;
 
-	std::string getShortParam();
+	std::string getShortParam() const;
 
-	std::string getDescription();
+	std::string getDescription() const;
 
-	std::string getArgumentSketch();
+	std::string getArgumentSketch() const;
 
 	std::string getDefaultValue() const;
 
-	bool isPositional();
+	bool isPositional() const;
 
 	/**
 	 * Defines a lexicographic order on command line
@@ -205,8 +205,16 @@ struct OptionConverter<bool> {
 
 	bool operator()(const program_option_impl& option) const {
 
-		if (!ProgramOptions::isOptionSet(option))
+		// option is not set
+		if (!ProgramOptions::isOptionSet(option)) {
+
+			// is its default "true"?
+			if (boost::lexical_cast<bool>(ProgramOptions::getOptionValue(option)))
+				return true;
+
+			// otherwise, we say false
 			return false;
+		}
 
 		if (ProgramOptions::getOptionValue(option) == "false")
 			return false;
