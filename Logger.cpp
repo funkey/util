@@ -199,11 +199,11 @@ LogFileManager::openFile(std::string filename) {
 // Implementation - Logger
 
 boost::mutex Logger::FlushMutex;
+bool Logger::_showChannelPrefix = true;
 
 Logger::Logger(std::streambuf* streamBuffer, const std::string& prefix) :
   std::ostream(streamBuffer),
-  _prefix(prefix),
-  _showChannelPrefix(showChannelPrefix)
+  _prefix(prefix)
 {
   // Empty
 }
@@ -246,6 +246,9 @@ LogManager::init()
     printChannels();
     exit(0);
   }
+
+  // read from program options
+  Logger::showChannelPrefix(showChannelPrefix);
 
   // set channel log levels
   if (channelLevel) {

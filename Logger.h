@@ -59,6 +59,11 @@ public:
 
 	Logger& operator=(const Logger& logger);
 
+	static void showChannelPrefix(bool show) {
+
+		_showChannelPrefix = show;
+	}
+
 	template <typename T>
 	Logger& operator<<(T* t) {
 
@@ -144,7 +149,8 @@ private:
 	// reference to the owning LogChannel's prefix
 	const std::string& _prefix;
 
-	bool _showChannelPrefix;
+	// show the prefix for all channels
+	static bool _showChannelPrefix;
 
 	// thread local buffer
 	boost::thread_specific_ptr<std::stringstream> _buffer;
