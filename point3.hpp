@@ -6,6 +6,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <util/point.hpp>
 
 namespace util {
 
@@ -95,22 +96,26 @@ struct point3 {
 		return *this;
 	}
 	
-	bool operator>=(const point3<T>& other) const
+	template<typename S>
+	bool operator>=(const point3<S>& other) const
 	{
 		return x >= other.x && y >= other.y && z >= other.z;
 	}
 	
-	bool operator<=(const point3<T>& other) const
+	template<typename S>
+	bool operator<=(const point3<S>& other) const
 	{
 		return x <= other.x && y <= other.y && z <= other.z;
 	}
 	
-	bool operator>(const point3<T>& other) const
+	template<typename S>
+	bool operator>(const point3<S>& other) const
 	{
 		return x > other.x && y > other.y && z > other.z;
 	}
 	
-	bool operator<(const point3<T>& other) const
+	template<typename S>
+	bool operator<(const point3<S>& other) const
 	{
 		return x < other.x && y < other.y && z < other.z;
 	}
@@ -124,6 +129,13 @@ struct point3 {
 
 		return !(*this == other);
 	}
+	
+	
+	operator util::point<T>()
+	{
+		return util::point<T>(x, y);
+	}
+
 };
 
 template <class T>
@@ -192,6 +204,7 @@ std::ostream& operator<<(std::ostream& os, const util::point3<T>& point) {
 
 	return os;
 }
+
 
 #endif // UTIL_POINT3_H__
 
