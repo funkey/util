@@ -3,9 +3,11 @@
 
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include <boost/functional/hash.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/concept_check.hpp>
 #include <util/point.hpp>
 
 namespace util {
@@ -134,6 +136,16 @@ struct point3 {
 	operator util::point<T>()
 	{
 		return util::point<T>(x, y);
+	}
+	
+	point3<T> min(point3<T> pt)
+	{
+		return point3<T>(std::min(x, pt.x), std::min(y, pt.y), std::min(z, pt.z));
+	}
+	
+	point3<T> max(point3<T> pt)
+	{
+		return point3<T>(std::max(x, pt.x), std::max(y, pt.y), std::max(z, pt.z));
 	}
 
 };
