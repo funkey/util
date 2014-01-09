@@ -133,7 +133,7 @@ struct point3 {
 	}
 	
 	
-	operator util::point<T>()
+	operator util::point<T>() const
 	{
 		return util::point<T>(x, y);
 	}
