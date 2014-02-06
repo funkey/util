@@ -132,7 +132,7 @@ read(H5::CommonFG& fg, std::string name) {
 
 	// compute the size
 	unsigned int size = 1;
-	for (int d = 0; d < dims.size(); d++)
+	for (unsigned int d = 0; d < dims.size(); d++)
 		size *= dims[d];
 
 	// create a data buffer

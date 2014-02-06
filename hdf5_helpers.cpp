@@ -7,11 +7,13 @@
 namespace hdf5 {
 
 herr_t
-visit_group(hid_t location_id, const char* name, const H5L_info_t* info, void* data) {
+visit_group(hid_t location_id, const char* /*name*/, const H5L_info_t* /*info*/, void* data) {
 
 	std::vector<H5::Group>* groups = (std::vector<H5::Group>*)data;
 
 	groups->push_back(H5::Group(location_id));
+
+	return 0;
 }
 
 std::vector<H5::Group>
@@ -19,7 +21,7 @@ groups(H5::CommonFG& fg) {
 
 	std::vector<H5::Group> groups;
 
-	herr_t idx = H5Literate(fg.getLocId(), H5_INDEX_NAME, H5_ITER_INC, 0, &visit_group, &groups);
+	H5Literate(fg.getLocId(), H5_INDEX_NAME, H5_ITER_INC, 0, &visit_group, &groups);
 
 	return groups;
 }
