@@ -8,6 +8,10 @@
 
 namespace util {
 
+/**
+ * Represents a rectangle with a min point (inclusive) and a max point 
+ * (exclusive).
+ */
 template <typename T>
 struct rect {
 
