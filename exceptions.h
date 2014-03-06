@@ -22,6 +22,7 @@ struct Segfault          : virtual Exception {};
 struct IOError           : virtual Exception {};
 struct SizeMismatchError : virtual Exception {};
 struct UsageError        : virtual Exception {};
+struct NullPointer       : virtual Exception {};
 
 /*
  * TAGS
