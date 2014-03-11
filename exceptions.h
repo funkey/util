@@ -2,6 +2,7 @@
 #define EXCEPTIONS_H__
 
 #include <vector>
+#include <sstream>
 #include <execinfo.h>
 
 #include <boost/exception/all.hpp>
@@ -23,6 +24,27 @@ struct IOError           : virtual Exception {};
 struct SizeMismatchError : virtual Exception {};
 struct UsageError        : virtual Exception {};
 struct NullPointer       : virtual Exception {};
+
+/*
+ * THROW MACRO
+ *
+ * Usage:
+ *
+ * UTIL_THROW_EXCEPTION(ExceptionType, message)
+ *
+ * Example:
+ *
+ *   UTIL_THROW_EXCEPTION(
+ *       UsageError,
+ *       "number of ordered pizzas is negative: " << numPizzas << " < 0");
+ */
+
+#define UTIL_THROW_EXCEPTION(exception, message) \
+	{ \
+		std::stringstream __util_messageStream; \
+		__util_messageStream << message; \
+		BOOST_THROW_EXCEPTION(exception() << error_message(__util_messageStream.str()) << STACK_TRACE); \
+	}
 
 /*
  * TAGS
