@@ -196,6 +196,6 @@ void handleException(boost::exception& e, std::ostream& out) {
 
 		out << std::endl << "error message:" << std::endl << std::endl;;
 		out << "\t" << *boost::get_error_info<error_message>(e);
-		out << std::endl;
+		out << std::endl << std::endl;
 	}
 }
