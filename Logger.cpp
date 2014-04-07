@@ -90,14 +90,14 @@ std::set<LogChannel*>*                LogChannel::logChannels = 0;
 
 // Implementation - LogChannel
 
-LogChannel::LogChannel(std::string channelName, std::string prefix) :
+LogChannel::LogChannel(std::string channelName, std::string prefix, LogLevel level) :
   _channelName(channelName),
   _prefix(prefix),
   _error(std::cerr.rdbuf(), _prefix),
   _user(std::cout.rdbuf(), _prefix),
   _debug(std::cout.rdbuf(), _prefix),
   _all(std::cout.rdbuf(), _prefix),
-  _level(Global)
+  _level(level)
 {
   getChannels()->insert(this);
 }

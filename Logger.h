@@ -185,7 +185,7 @@ class LogChannel {
 
     static std::set<LogChannel*>*  getChannels();
 
-    LogChannel(std::string channelName, std::string prefix = "");
+    LogChannel(std::string channelName, std::string prefix = "", LogLevel level = Global);
 
     Logger& operator()(LogLevel level);
 
