@@ -3,6 +3,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "typename.h"
 #include "Logger.h"
 #include "demangle.h"
 #include "exceptions.h"
@@ -14,7 +15,7 @@ stack_trace_::stack_trace_() {
 	std::string programName = get_program_name();
 	std::string pid         = get_pid();
 
-	_stack_trace.push_back(std::string("[trace] back trace for ") + programName + " (" + pid + "):");
+	_stack_trace.push_back(std::string("\t[trace] back trace for ") + programName + " (" + pid + "):");
 
 	// create a pipe to read gdb's output
 	int pipefds[2];
@@ -103,7 +104,7 @@ stack_trace_::stack_trace_() {
 		do {
 
 			if (line.size() > 0 && line[0] != '\n')
-				_stack_trace.push_back(std::string("[trace] ") + line);
+				_stack_trace.push_back(std::string("\t[trace] ") + line);
 
 		} while (std::getline(oss, line));
 
@@ -156,19 +157,45 @@ stack_trace_::initialise_program_name() {
 
 void handleException(boost::exception& e, std::ostream& out) {
 
-	out << "caught exception: ";
-
-	if (boost::get_error_info<error_message>(e))
-		out << *boost::get_error_info<error_message>(e);
-
 	out << std::endl;
+	out << "caught exception" << std::endl << std::endl;
 
-	out << "stack trace:" << std::endl;
+	if (boost::get_error_info<stack_trace>(e)) {
 
-	if (boost::get_error_info<stack_trace>(e))
+		out << "###############" << std::endl;
+		out << "# STACK TRACE #" << std::endl;
+		out << "###############" << std::endl;
+		out << std::endl << std::endl;
 		out << *boost::get_error_info<stack_trace>(e);
+		out << std::endl << std::endl;
+	}
 
-	out << std::endl;
+	out << "#####################" << std::endl;
+	out << "# EXCEPTION SUMMARY #" << std::endl;
+	out << "#####################" << std::endl;
+	out << std::endl << std::endl;
 
-	exit(-1);
+	out << "exception type:" << std::endl << std::endl << "\t" << typeName(e) << std::endl << std::endl;
+
+	if (boost::get_error_info<boost::throw_function>(e)) {
+
+		out << "throw location:" << std::endl << std::endl;
+		out << "\t" << *boost::get_error_info<boost::throw_function>(e) << std::endl;
+
+		if (boost::get_error_info<boost::throw_file>(e)) {
+
+			out << "\tin " << *boost::get_error_info<boost::throw_file>(e);
+			if (boost::get_error_info<boost::throw_line>(e))
+				out << "(" << *boost::get_error_info<boost::throw_line>(e) << ")";
+		}
+
+		out << std::endl;
+	}
+
+	if (boost::get_error_info<error_message>(e)) {
+
+		out << std::endl << "error message:" << std::endl << std::endl;;
+		out << "\t" << *boost::get_error_info<error_message>(e);
+		out << std::endl << std::endl;
+	}
 }

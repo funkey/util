@@ -21,7 +21,7 @@ std::string readline(std::ifstream& s) {
 			continue;
 		}
 
-		if (s.gcount() < UTIL_READLINE_BUFFER_SIZE)
+		if (s.gcount() <= UTIL_READLINE_BUFFER_SIZE)
 			break;
 	}
 
