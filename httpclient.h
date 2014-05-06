@@ -12,6 +12,12 @@
 #include <map>
 #include <cstdlib>
 #include <algorithm>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/shared_ptr.hpp>
+#include <util/foreach.h>
+#include <vector>
+
+using boost::property_tree::ptree;
 
 class HttpClient
 {
@@ -49,6 +55,21 @@ class HttpClient
                         const std::string& data);
     // HTTP DELETE
     static response del(const std::string& url);
+	
+	static boost::shared_ptr<ptree> jsonPtree(const std::string& json);
+	
+	template <typename T>
+	static unsigned int ptreeVector(const ptree& pt, std::vector<T>& vect)
+	{
+		unsigned int count = 0;
+		vect.reserve(vect.size() + pt.size());
+		foreach (ptree::value_type v, pt)
+		{
+			vect.push_back(v.second.get_value<T>());
+			++count;
+		}
+		return count;
+	}
 
   private:
     // writedata callback function

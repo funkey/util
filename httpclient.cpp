@@ -12,6 +12,8 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/make_shared.hpp>
 
 /** initialize user agent string */
 const char* HttpClient::user_agent = "sopnet/0.10";
@@ -364,4 +366,15 @@ size_t HttpClient::read_callback(void *data, size_t size, size_t nmemb,
   u->data += copy_size;
   /** return copied size */
   return copy_size;
+}
+
+boost::shared_ptr<boost::property_tree::ptree>
+HttpClient::jsonPtree(const std::string& json)
+{
+	boost::shared_ptr<boost::property_tree::ptree> pt
+		= boost::make_shared<boost::property_tree::ptree>();
+	std::stringstream ss;
+	ss << json;
+	boost::property_tree::read_json(ss, *pt);
+	return pt;
 }
