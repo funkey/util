@@ -201,6 +201,14 @@ util::point3<T> operator*(const T& s, const util::point3<T>& p) {
 	return result *= s;
 }
 
+template <typename T>
+util::point3<T> operator*(const util::point3<T>& p1, const util::point3<T>& p2) {
+
+	util::point3<T> result(p1);
+
+	return result *= p2;
+}
+
 template <typename T, typename S>
 util::point3<T> operator/(const util::point3<T>& p, const S& s) {
 
