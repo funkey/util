@@ -28,6 +28,21 @@ struct point3 {
 		x(other.x),
 		y(other.y),
 		z(other.z){}
+	
+	/**
+	 * Construct a 3D point from a vector with at least 3 entries.
+	 */
+	template <typename S>
+	point3(const std::vector<S>& vect)
+	{
+		if (vect.size() >= 3)
+		{
+			x = vect[0];
+			y = vect[1];
+			z = vect[2];
+		}
+		// TODO: throw an exception?
+	}
 
 	T x;
 	T y;
