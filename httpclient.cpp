@@ -14,6 +14,9 @@
 #include <map>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/make_shared.hpp>
+#include <util/Logger.h>
+
+logger::LogChannel httpclientlog("httpclientlog", "[HttpClient] ");
 
 /** initialize user agent string */
 const char* HttpClient::user_agent = "sopnet/0.10";
@@ -368,13 +371,78 @@ size_t HttpClient::read_callback(void *data, size_t size, size_t nmemb,
   return copy_size;
 }
 
-boost::shared_ptr<boost::property_tree::ptree>
-HttpClient::jsonPtree(const std::string& json)
+void
+HttpClient::handleNon200(const HttpClient::response& res, const std::string& url)
 {
-	boost::shared_ptr<boost::property_tree::ptree> pt
-		= boost::make_shared<boost::property_tree::ptree>();
-	std::stringstream ss;
-	ss << json;
-	boost::property_tree::read_json(ss, *pt);
-	return pt;
+	//TODO: throw exception?
+	LOG_ERROR(httpclientlog) << "When trying url [" << url << "], received non-OK code " <<
+		res.code << std::endl;
+	
 }
+
+boost::shared_ptr<ptree>
+HttpClient::getPropertyTree(const std::string& url)
+{
+	HttpClient::response res = HttpClient::get(url);
+	if (res.code != 200)
+	{
+		std::ostringstream os;
+		boost::shared_ptr<ptree> pt = boost::make_shared<ptree>();
+		handleNon200(res, url);
+		os << "Status " << res.code << " when getting " << url;
+		pt->put("error", os.str());
+		return pt;
+	}
+	else
+	{
+		boost::shared_ptr<boost::property_tree::ptree> pt
+			= boost::make_shared<boost::property_tree::ptree>();
+		std::stringstream ss;
+		ss << res.body;
+		boost::property_tree::read_json(ss, *pt);
+		return pt;
+	}
+}
+
+bool
+HttpClient::ptreeHasChild(const boost::shared_ptr<ptree> pt, const std::string& childName)
+{
+	if (!pt->get_child_optional(childName))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+
+bool
+HttpClient::checkDjangoError(const boost::shared_ptr<ptree> pt)
+{
+	if (!pt)
+	{
+		LOG_ERROR(httpclientlog) << "JSON Error: null property tree" << std::endl;
+		return true;
+	}
+	else if (ptreeHasChild(pt, "info") && ptreeHasChild(pt, "traceback"))
+	{
+		LOG_ERROR(httpclientlog) << "Django error: "  <<
+			pt->get_child("info").get_value<std::string>() << std::endl;
+		LOG_ERROR(httpclientlog) << "    traceback: "
+			<< pt->get_child("traceback").get_value<std::string>() << std::endl;
+		return true;
+	}
+	else if (ptreeHasChild(pt, "error"))
+	{
+		LOG_ERROR(httpclientlog) << "HTTP Error: " <<
+			pt->get_child("error").get_value<std::string>() << std::endl;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+

@@ -56,7 +56,9 @@ class HttpClient
     // HTTP DELETE
     static response del(const std::string& url);
 	
-	static boost::shared_ptr<ptree> jsonPtree(const std::string& json);
+	static boost::shared_ptr<ptree> getPropertyTree(const std::string& url);
+	
+	static void handleNon200(const response& res, const std::string& url);
 	
 	template <typename T>
 	static unsigned int ptreeVector(const ptree& pt, std::vector<T>& vect)
@@ -70,6 +72,8 @@ class HttpClient
 		}
 		return count;
 	}
+	
+	static bool checkDjangoError(const boost::shared_ptr<ptree> pt);
 
   private:
     // writedata callback function
@@ -101,6 +105,8 @@ class HttpClient
     static inline std::string &trim(std::string &s) {
       return ltrim(rtrim(s));
     }
+    
+    static bool ptreeHasChild(const boost::shared_ptr<ptree> pt, const std::string& childName);
 
 };
 
