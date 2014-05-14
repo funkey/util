@@ -383,7 +383,22 @@ HttpClient::handleNon200(const HttpClient::response& res, const std::string& url
 boost::shared_ptr<ptree>
 HttpClient::getPropertyTree(const std::string& url)
 {
-	HttpClient::response res = HttpClient::get(url);
+	response res = HttpClient::get(url);
+	return parsePtree(res, url);
+	
+	
+}
+
+boost::shared_ptr<ptree>
+HttpClient::postPropertyTree(const std::string& url, const std::string& data)
+{
+	response res = HttpClient::post(url, "text/plain", data);
+	return parsePtree(res, url);
+}
+
+boost::shared_ptr<ptree>
+HttpClient::parsePtree(const HttpClient::response& res, const std::string& url)
+{
 	if (res.code != 200)
 	{
 		std::ostringstream os;
@@ -403,6 +418,7 @@ HttpClient::getPropertyTree(const std::string& url)
 		return pt;
 	}
 }
+
 
 bool
 HttpClient::ptreeHasChild(const boost::shared_ptr<ptree> pt, const std::string& childName)

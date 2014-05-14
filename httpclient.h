@@ -58,6 +58,9 @@ class HttpClient
 	
 	static boost::shared_ptr<ptree> getPropertyTree(const std::string& url);
 	
+	static boost::shared_ptr<ptree> postPropertyTree(const std::string& url,
+		const std::string& data);
+	
 	static void handleNon200(const response& res, const std::string& url);
 	
 	template <typename T>
@@ -107,6 +110,8 @@ class HttpClient
     }
     
     static bool ptreeHasChild(const boost::shared_ptr<ptree> pt, const std::string& childName);
+	
+	static boost::shared_ptr<ptree> parsePtree(const response& res, const std::string& url);
 
 };
 
