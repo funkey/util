@@ -450,6 +450,11 @@ HttpClient::checkDjangoError(const boost::shared_ptr<ptree> pt)
 			<< pt->get_child("traceback").get_value<std::string>() << std::endl;
 		return true;
 	}
+	else if (ptreeHasChild(pt, "djerror"))
+	{
+		LOG_ERROR(httpclientlog) << "Django error: "  <<
+			pt->get_child("djerror").get_value<std::string>() << std::endl;
+	}
 	else if (ptreeHasChild(pt, "error"))
 	{
 		LOG_ERROR(httpclientlog) << "HTTP Error: " <<
