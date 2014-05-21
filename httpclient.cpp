@@ -377,7 +377,6 @@ HttpClient::handleNon200(const HttpClient::response& res, const std::string& url
 	//TODO: throw exception?
 	LOG_ERROR(httpclientlog) << "When trying url [" << url << "], received non-OK code " <<
 		res.code << std::endl;
-	
 }
 
 boost::shared_ptr<ptree>
@@ -385,8 +384,6 @@ HttpClient::getPropertyTree(const std::string& url)
 {
 	response res = HttpClient::get(url);
 	return parsePtree(res, url);
-	
-	
 }
 
 boost::shared_ptr<ptree>
@@ -454,6 +451,7 @@ HttpClient::checkDjangoError(const boost::shared_ptr<ptree> pt)
 	{
 		LOG_ERROR(httpclientlog) << "Django error: "  <<
 			pt->get_child("djerror").get_value<std::string>() << std::endl;
+		return true;
 	}
 	else if (ptreeHasChild(pt, "error"))
 	{
