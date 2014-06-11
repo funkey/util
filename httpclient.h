@@ -104,6 +104,8 @@ class HttpClient
 	 * @return true if an error was detected, false if all is ok
 	 */
 	static bool checkDjangoError(const boost::shared_ptr<ptree> pt);
+	
+	static bool ptreeHasChild(const boost::shared_ptr<ptree> pt, const std::string& childName);
 
   private:
     // writedata callback function
@@ -135,12 +137,11 @@ class HttpClient
     static inline std::string &trim(std::string &s) {
       return ltrim(rtrim(s));
     }
-    
-    static bool ptreeHasChild(const boost::shared_ptr<ptree> pt, const std::string& childName);
-	
+
 	static boost::shared_ptr<ptree> parsePtree(const response& res, const std::string& url);
-	
+
 	static void handleNon200(const response& res, const std::string& url);
+
 };
 
 #endif  // HTTPCLIENT_H__
