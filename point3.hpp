@@ -33,7 +33,8 @@ struct point3 {
 	 * Construct a 3D point from a vector with at least 3 entries.
 	 */
 	template <typename S>
-	point3(const std::vector<S>& vect)
+	// std::allocator<S> used as a workaround for GCC 4.6.3
+	point3(const std::vector<S, std::allocator<S> >& vect)
 	{
 		if (vect.size() >= 3)
 		{
