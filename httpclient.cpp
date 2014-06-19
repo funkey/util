@@ -389,7 +389,7 @@ HttpClient::getPropertyTree(const std::string& url)
 boost::shared_ptr<ptree>
 HttpClient::postPropertyTree(const std::string& url, const std::string& data)
 {
-	response res = HttpClient::post(url, "text/plain", data);
+	response res = HttpClient::post(url, "application/x-www-form-urlencoded", data);
 	return parsePtree(res, url);
 }
 
