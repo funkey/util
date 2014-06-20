@@ -411,7 +411,23 @@ HttpClient::parsePtree(const HttpClient::response& res, const std::string& url)
 			= boost::make_shared<boost::property_tree::ptree>();
 		std::stringstream ss;
 		ss << res.body;
-		boost::property_tree::read_json(ss, *pt);
+
+		try {
+
+			boost::property_tree::read_json(ss, *pt);
+
+		} catch (std::exception& e) {
+
+			LOG_ERROR(httpclientlog)
+					<< "error reading result of URL:" << std::endl
+					<< "\t" << url << std::endl;
+			LOG_ERROR(httpclientlog)
+					<< "response is:" << std::endl
+					<< res.body << std::endl;
+
+			throw;
+		}
+
 		return pt;
 	}
 }
