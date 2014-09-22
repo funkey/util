@@ -6,7 +6,7 @@
 
 namespace boost {
 
-#if BOOST_VERSION != 104900
+#if BOOST_VERSION > 104900
 	namespace BOOST_FOREACH = foreach;
 #endif
 
