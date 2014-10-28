@@ -11,6 +11,7 @@
 
 #include <cassert>
 #include <vector>
+#include <set>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -166,7 +167,7 @@ std::vector<T>& operator/=(std::vector<T>& lhs, U rhs) {
 }
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, std::vector<T> vector) {
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
   os << "[";
 
@@ -180,4 +181,22 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> vector) {
 
   return os;
 }
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const std::set<T>& set) {
+
+  os << "{";
+
+  typename std::set<T>::const_iterator i;
+  for (i = set.begin(); i != set.end(); i++) {
+      if (i != set.begin())
+        os << ", ";
+      os << *i;
+  }
+
+  os << "}";
+
+  return os;
+}
+
 
