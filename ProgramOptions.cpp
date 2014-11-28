@@ -9,6 +9,7 @@
 #include <boost/program_options.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <util/exceptions.h>
 #include <util/foreach.h>
 #include <config.h>
 #include "ProgramOptions.h"
@@ -130,8 +131,9 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 
 	if (!config.good()) {
 
-		std::cerr << "ERROR: can't open config file: " << configFile << std::endl;
-		return;
+		UTIL_THROW_EXCEPTION(
+			IOError,
+			"can't open config file: " << configFile << std::endl);
 	}
 
 	// read from the config file
@@ -174,8 +176,9 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 
 			if (!boost::filesystem::exists(includeFile)) {
 
-				std::cerr << "ERROR: include file " << includeFile << " does not exist" << std::endl;
-				continue;
+				UTIL_THROW_EXCEPTION(
+					IOError,
+					"include file " << includeFile << " does not exist");
 			}
 
 			readFromFile(includeFile, values);
