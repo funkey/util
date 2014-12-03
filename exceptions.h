@@ -93,7 +93,7 @@ typedef boost::error_info<struct tag_mismatch_size2, int> mismatch_size2;
  * HELPER FUNCTIONS
  */
 
-void handleException(boost::exception& e, std::ostream& out);
+void handleException(const boost::exception& e, std::ostream& out);
 
 #endif // EXCEPTIONS_H__
 

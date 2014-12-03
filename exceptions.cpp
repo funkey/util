@@ -155,7 +155,7 @@ stack_trace_::initialise_program_name() {
 		_program_name += name[i];
 }
 
-void handleException(boost::exception& e, std::ostream& out) {
+void handleException(const boost::exception& e, std::ostream& out) {
 
 	out << std::endl;
 	out << "caught exception" << std::endl << std::endl;
