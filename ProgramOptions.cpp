@@ -46,7 +46,7 @@ is_less::operator()(program_option_impl* left, program_option_impl* right) {
 }
 
 void
-ProgramOptions::init(int argc, char** argv) {
+ProgramOptions::init(int argc, char** argv, bool ignoreUnknown) {
 
 	BinaryName = argv[0];
 
@@ -58,7 +58,21 @@ ProgramOptions::init(int argc, char** argv) {
 
 	// get all options
 	boost::program_options::variables_map values;
-	boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(*CommandLineOptions).positional(*Positional).run(), values);
+	if (ignoreUnknown)
+		boost::program_options::store(
+				boost::program_options::command_line_parser(argc, argv).
+				options(*CommandLineOptions).
+				positional(*Positional).
+				allow_unregistered().
+				run(),
+				values);
+	else
+		boost::program_options::store(
+				boost::program_options::command_line_parser(argc, argv).
+				options(*CommandLineOptions).
+				positional(*Positional).
+				run(),
+				values);
 	boost::program_options::notify(values);
 
 	// set initial program option values

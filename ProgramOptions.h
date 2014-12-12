@@ -39,7 +39,7 @@ class ProgramOptions {
 
 public:
 
-	static void init(int argc, char** argv);
+	static void init(int argc, char** argv, bool ignoreUnknown = false);
 
 	static bool isOptionSet(const program_option_impl& option);
 
