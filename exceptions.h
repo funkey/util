@@ -47,6 +47,13 @@ struct NotYetImplemented : virtual Exception {};
 		BOOST_THROW_EXCEPTION(exception() << error_message(__util_messageStream.str()) << STACK_TRACE); \
 	}
 
+#define UTIL_RETHROW(e, message) \
+	{ \
+		std::stringstream __util_messageStream; \
+		__util_messageStream << *boost::get_error_info<error_message>(e) << message; \
+		BOOST_THROW_EXCEPTION(e << error_message(__util_messageStream.str())); \
+	}
+
 /*
  * TAGS
  */
