@@ -199,6 +199,8 @@ class LogChannel {
 
   private:
 
+    friend class LoggerCleanup;
+
     static  std::set<LogChannel*>*  logChannels;
 
     static  LogFileManager  logFileManager;
@@ -245,6 +247,17 @@ class LogManager {
 
     static LogLevel globalLogLevel;
 };
+
+struct LoggerCleanup {
+
+	~LoggerCleanup() {
+
+		if (LogChannel::logChannels != 0)
+			delete LogChannel::logChannels;
+	}
+};
+
+extern LoggerCleanup loggerCleanup;
 
 typedef std::set<LogChannel*>::iterator channel_it;
 

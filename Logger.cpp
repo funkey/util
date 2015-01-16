@@ -87,6 +87,7 @@ LogLevel                              LogManager::globalLogLevel = User;
 LogFileManager                        LogChannel::logFileManager;
 std::set<LogChannel*>*                LogChannel::logChannels = 0;
 
+LoggerCleanup loggerCleanup;
 
 // Implementation - LogChannel
 

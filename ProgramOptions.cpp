@@ -23,6 +23,8 @@ boost::program_options::options_description*            ProgramOptions::CommandL
 boost::program_options::positional_options_description* ProgramOptions::Positional = 0;
 boost::program_options::options_description*            ProgramOptions::ConfigFileOptions  = 0;
 
+ProgramOptionsCleanup programOptionsCleanup;
+
 std::string ProgramOptions::BinaryName = "";
 
 ProgramOption help(
