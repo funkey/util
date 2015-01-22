@@ -120,13 +120,13 @@ public:
 			_list(list),
 			_converter(converter) {}
 
-		void inc(num_key_type& i) { i++; skip_invalids(i); }
+		void inc(num_key_type& i) const { i++; skip_invalids(i); }
 
 	protected:
 
-		num_key_type end() { return _list.size(); }
+		num_key_type end() const { return _list.size(); }
 
-		void skip_invalids(num_key_type& i) {
+		void skip_invalids(num_key_type& i) const {
 
 			if (i == end())
 				return;
@@ -155,13 +155,13 @@ public:
 			i++;
 		}
 
-		void inc(num_key_type& i) { i--; skip_invalids(i); }
+		void inc(num_key_type& i) const { i--; skip_invalids(i); }
 
 	protected:
 
-		num_key_type end() { return 0; }
+		num_key_type end() const { return 0; }
 
-		void skip_invalids(num_key_type& i) {
+		void skip_invalids(num_key_type& i) const {
 
 			// traverse the list until we find a valid element
 			while (i != end() && i-1 != _converter(_list[i-1].first))
