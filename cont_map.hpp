@@ -1,6 +1,9 @@
 #ifndef UTIL_CONT_MAP_H__
 #define UTIL_CONT_MAP_H__
 
+#include <vector>
+#include <map>
+
 namespace util {
 
 /**
@@ -11,12 +14,19 @@ struct identity {
 
 	typedef T TargetType;
 
-	static const TargetType& operator()(const T& t) { return t; }
+	const TargetType& operator()(const T& t) { return t; }
 };
 
 /**
  * Implements a std::map interface for keys that have a numerical interpretation 
  * and are expected to be continuous.
+ *
+ * Key-value pairs are internally stored as std::pair elements of a std::vector, 
+ * such that the index i in the vector is the same as the numerical 
+ * interpretation of the key (pair.first). Empty elements are represented by 
+ * keys that are not the same as the index, but point to the next valid element 
+ * for fast forward iteration. Consequently, backward iteration is slower than 
+ * forward iteration.
  */
 template <
 		typename Key,
@@ -28,68 +38,140 @@ class cont_map {
 public:
 
 	// forward declaration
-	class cont_map_iterator;
+	template <typename Direction>
+	class cont_map_iterator_base;
+	class forward_direction;
+	class backward_direction;
+
+	typedef cont_map_iterator_base<forward_direction>  cont_map_iterator;
+	typedef cont_map_iterator_base<backward_direction> cont_map_reverse_iterator;
 
 	typedef cont_map<Key, T, NumConverter, Alloc> map_type;
 	typedef typename NumConverter::TargetType num_key_type;
 
 	// map interface
-	typedef Key                              key_type;
-	typedef T                                mapped_type;
-	typedef std::pair<const Key, T>          value_type;
-	typedef Alloc                            allocator_type;
-	typedef allocator_type::reference        reference;
-	typedef allocator_type::const_reference  const_reference;
-	typedef allocator_type::pointer          pointer;
-	typedef allocator_type::const_pointer    const_pointer;
-	typedef cont_map_iterator                iterator;
-	typedef const cont_map_iterator          const_iterator;
-	typedef cont_map_reverse_iterator        reverse_iterator;
-	typedef const cont_map_reverse_iterator  const_reverse_iterator;
-	typedef std::vector<value_type, Alloc>   list_type;
-	typedef list_type::difference_type       difference_type;
-	typedef list_type::size_type             size_type;
+	typedef Key                                       key_type;
+	typedef T                                         mapped_type;
+	typedef std::pair<Key, T>                         value_type;
+	typedef Alloc                                     allocator_type;
+	typedef typename allocator_type::reference        reference;
+	typedef typename allocator_type::const_reference  const_reference;
+	typedef typename allocator_type::pointer          pointer;
+	typedef typename allocator_type::const_pointer    const_pointer;
+	typedef cont_map_iterator                         iterator;
+	typedef const cont_map_iterator                   const_iterator;
+	typedef cont_map_reverse_iterator                 reverse_iterator;
+	typedef const cont_map_reverse_iterator           const_reverse_iterator;
+	typedef std::vector<value_type, Alloc>            list_type;
+	typedef typename list_type::difference_type       difference_type;
+	typedef typename list_type::size_type             size_type;
 
 	////////////////////////////////////////////////////////////////////////////////
 	// iterator
 	////////////////////////////////////////////////////////////////////////////////
 
-	class cont_map_iterator {
+	template <typename Direction>
+	class cont_map_iterator_base : public Direction {
 
 	public:
 
-		cont_map_iterator(list_type& list, num_key_type i, NumConverter& converter) :
+		typedef cont_map_iterator_base<Direction> iterator_type;
+
+		cont_map_iterator_base(list_type& list, num_key_type i, NumConverter& converter) :
+			Direction(list, i, converter),
 			_list(list),
-			_i(std::min(i, end())),
+			_i(i),
 			_converter(converter) {
 
-			skip_invalids();
+			if (_i < 0)            _i = 0;
+			if (_i > _list.size()) _i = _list.size();
+
+			Direction::skip_invalids(_i);
 		}
 
-		mapped_type& operator*() { return _list[i]; }
-		const mapped_type& operator*() const { return _list[i]; }
+		value_type&       operator*()       { return _list[_i]; }
+		const value_type& operator*() const { return _list[_i]; }
 
-		iterator& operator++() { _i++; skip_invalids(); return *this; }
-		const_iterator& operator++() const { _i++; skip_invalids(); return *this; }
+		      value_type* operator->()       { return &_list[_i]; }
+		const value_type* operator->() const { return &_list[_i]; }
+
+		iterator_type        operator++(int)       {       iterator_type p = *this; Direction::inc(_i); return p; }
+		const iterator_type  operator++(int) const { const iterator_type p = *this; Direction::inc(_i); return p; }
+		iterator_type&       operator++()          { Direction::inc(_i); return *this; }
+		const iterator_type& operator++()    const { Direction::inc(_i); return *this; }
+
+		bool operator==(const iterator_type& other) const { return _i == other._i; }
+		bool operator!=(const iterator_type& other) const { return _i != other._i; }
+
+		inline num_key_type index() { return _i; }
 
 	private:
 
-		void skip_invalids() {
+		list_type&            _list;
+		mutable num_key_type  _i;
+		NumConverter&         _converter;
+	};
 
-			// i == end?
-			if (_i == end())
+	class forward_direction {
+
+	public:
+
+		forward_direction(list_type& list, num_key_type&, NumConverter& converter) :
+			_list(list),
+			_converter(converter) {}
+
+		void inc(num_key_type& i) { i++; skip_invalids(i); }
+
+	protected:
+
+		num_key_type end() { return _list.size(); }
+
+		void skip_invalids(num_key_type& i) {
+
+			if (i == end())
 				return;
 
 			// keys of invalid elements point to the next valid one, keys of 
 			// valid elements point to themselves
-			_i = _converter(_list[i].first);
+			i = _converter(_list[i].first);
 		}
 
-		inline num_key_type end() { return _list.size(); }
+	private:
 
-		map_type&             _list;
-		mutable num_key_type  _i;
-		mutable NumConverter& _converter;
+		list_type&            _list;
+		NumConverter&         _converter;
+	};
+
+	class backward_direction {
+
+	public:
+
+		backward_direction(list_type& list, num_key_type& i, NumConverter& converter) :
+			_list(list),
+			_converter(converter) {
+
+			// we represent element i by keeping an index to i+1 (this way we 
+			// can have 0 as end)
+			i++;
+		}
+
+		void inc(num_key_type& i) { i--; skip_invalids(i); }
+
+	protected:
+
+		num_key_type end() { return 0; }
+
+		void skip_invalids(num_key_type& i) {
+
+			// traverse the list until we find a valid element
+			while (i != end() && i-1 != _converter(_list[i-1].first))
+				i--;
+		}
+
+	private:
+
+		list_type&            _list;
+		NumConverter&         _converter;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -97,11 +179,22 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 
 	cont_map(const NumConverter& converter = NumConverter()) :
+		_size(0),
 		_converter(converter) {}
 
+	// iterators
+	iterator begin() { return iterator(_list, 0, _converter); }
+	iterator end() { return iterator(_list, _list.size(), _converter); }
+	const_iterator begin() const { return iterator(_list, 0, _converter); }
+	const_iterator end() const { return iterator(_list, _list.size(), _converter); }
+	reverse_iterator rbegin() { return reverse_iterator(_list, _list.size() - 1, _converter); }
+	reverse_iterator rend() { return ++reverse_iterator(_list, 0, _converter); }
+	const_reverse_iterator rbegin() const { return reverse_iterator(_list, _list.size() - 1, _converter); }
+	const_reverse_iterator rend() const { return ++reverse_iterator(_list, 0, _converter); }
+
 	// capacity
-	bool empty() { return _list.empty(); }
-	size_type size() { return _list.size(); }
+	bool empty() { return _size == 0; }
+	size_type size() { return _size; }
 	size_type max_size() { return _list.max_size(); }
 
 	// element access
@@ -109,18 +202,14 @@ public:
 
 		num_key_type k = _converter(key);
 
-		// key is beyond current list size
-		if (k >= _list.size()) {
+		accomodate(k);
 
-			// create new fields at the end, with keys that point to the last 
-			// element (which is k)
-			_list.resize(k, std::make_pair(_converter(k), T()));
-		}
-
-		// key is not assignmed, yet
-		if (k != _converter(_list[k].first)) {
-
-			_list[k].first = key;
+		// make valid
+		if (!is_valid(k)) {
+			reverse_iterator prev_valid(_list, k, _converter);
+			for (num_key_type i = prev_valid.index(); i <= k; i++)
+				_list[i].first = key;
+			_size++;
 		}
 
 		return _list[k].second;
@@ -141,16 +230,12 @@ public:
 
 		num_key_type k = _converter(value.first);
 
-		// key is beyond current list size
-		if (k >= _list.size()) {
-
-			// create new fields at the end, with keys that point to the end of 
-			// the list
-			_list.resize(k, std::make_pair(_converter(k), T()));
-		}
-
+		accomodate(k);
 		bool contained = is_valid(k);
+
 		_list[k] = value;
+		if (!contained)
+			_size++;
 
 		return std::make_pair(iterator(_list, k, _converter), contained);
 	}
@@ -171,22 +256,26 @@ public:
 		if (position == end())
 			return;
 
-		if (!is_valid(position.index))
+		if (!is_valid(position.index()))
 			return;
 
-		// find next valid element or end
-		num_key_type i = position.index + 1;
-		while (!is_valid(i))
-			i++;
+		// find previous and next valid element or end
+		iterator         next_valid = position;
+		reverse_iterator prev_valid(_list, position.index(), _converter);
+		next_valid++;
+		prev_valid++;
 
-		// invalidate position
-		position->first = _converter(i);
+		// update pointers to next valid
+		for (num_key_type i = prev_valid.index(); i <= position.index(); i++)
+			_list[i].first = _converter(next_valid.index());
+
+		_size--;
 	}
 
 	size_type erase(const key_type& key) {
 
 		iterator position(_list, _converter(key), _converter);
-		if (!is_valid(position))
+		if (position == end())
 			return 0;
 
 		erase(position);
@@ -196,22 +285,24 @@ public:
 	void erase(iterator first, iterator last) {
 		while (first != last) {
 			erase(first);
-			first++;
+			++first;
 		}
 	}
 
 	void swap(map_type& other) {
 		_list.swap(other._list);
+		std::swap(_size, other._size);
 		std::swap(_converter, other._converter);
 	}
 
 	void clear() {
 		_list.clear();
+		_size = 0;
 	}
 
 	// observers
 	std::less<num_key_type> key_comp() { return std::less<num_key_type>(); }
-	std::map<Key, T, Alloc>::value_comp() { return std::map<Key, T, Alloc>::value_comp(); }
+	typename std::map<Key, T, Alloc>::value_compare value_comp() { return std::map<Key, T, Alloc>::value_comp(); }
 
 	// operations
 	iterator find(const key_type& key) {
@@ -222,7 +313,7 @@ public:
 	}
 
 	size_type count(const key_type& key) {
-		return is_valid(_converter(key));
+		return _converter(key) < _list.size() && is_valid(_converter(key));
 	}
 
 	iterator lower_bound(const key_type& key) {
@@ -257,17 +348,29 @@ public:
 
 private:
 
-	inline bool is_valid(num_key_type k) { return (k < _list.size() && _converter(_list[k].first) == k;) }
+	inline bool is_valid(num_key_type k) { return _converter(_list[k].first) == k; }
+
+	// grow the list to accomodate keys with numerical value k
+	inline void accomodate(num_key_type k) {
+
+		// key is beyond current list size
+		if (k >= _list.size()) {
+
+			// create new fields at the end, with keys that point to the 
+			// one-past last element (which is k+1)
+			_list.resize(k+1, std::make_pair(_converter(k+1), T()));
+		}
+	}
 
 	template <typename Iterator>
 	inline Iterator __find(const key_type& key) {
-		num_key_type k = _converter(key);
-		if (is_valid(k))
-			return Iterator(k);
+		if (count(key))
+			return Iterator(_converter(key));
 		return end();
 	}
 
 	list_type    _list;
+	size_type    _size;
 	NumConverter _converter;
 };
 
