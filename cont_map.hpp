@@ -215,6 +215,14 @@ public:
 		return _list[k].second;
 	}
 
+	const mapped_type& operator[](const key_type& key) const {
+
+		if (!count(key))
+			throw std::out_of_range("util::cont_map::operator[]");
+
+		return at(key);
+	}
+
 	const mapped_type& at(const key_type& key) const {
 
 		num_key_type k = _converter(key);
@@ -312,7 +320,7 @@ public:
 		return __find<const_iterator>(key);
 	}
 
-	size_type count(const key_type& key) {
+	size_type count(const key_type& key) const {
 		return _converter(key) < _list.size() && is_valid(_converter(key));
 	}
 
@@ -348,7 +356,7 @@ public:
 
 private:
 
-	inline bool is_valid(num_key_type k) { return _converter(_list[k].first) == k; }
+	inline bool is_valid(num_key_type k) const { return _converter(_list[k].first) == k; }
 
 	// grow the list to accomodate keys with numerical value k
 	inline void accomodate(num_key_type k) {
