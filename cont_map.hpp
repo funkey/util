@@ -198,7 +198,7 @@ public:
 	size_type max_size() { return _list.max_size(); }
 
 	// element access
-	mapped_type& operator[](const key_type& key) {
+	inline mapped_type& operator[](const key_type& key) {
 
 		num_key_type k = _converter(key);
 
@@ -215,7 +215,7 @@ public:
 		return _list[k].second;
 	}
 
-	const mapped_type& operator[](const key_type& key) const {
+	inline const mapped_type& operator[](const key_type& key) const {
 
 		if (!count(key))
 			throw std::out_of_range("util::cont_map::operator[]");
@@ -223,7 +223,7 @@ public:
 		return at(key);
 	}
 
-	const mapped_type& at(const key_type& key) const {
+	inline const mapped_type& at(const key_type& key) const {
 
 		num_key_type k = _converter(key);
 
@@ -232,6 +232,9 @@ public:
 
 		return _list[k].second;
 	}
+
+	inline const mapped_type& at_index(const num_key_type& index) const { return _list[index].second; }
+	inline mapped_type& at_index(const num_key_type& index)             { return _list[index].second; }
 
 	// modifiers
 	std::pair<iterator, bool> insert(const value_type& value) {
