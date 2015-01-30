@@ -46,6 +46,14 @@ enum LogLevel
             //                         for debug-output
 };
 
+/**
+ * Stream manipulators.
+ */
+enum Manip {
+
+	delline // delete the content of the current line
+};
+
 // forward declaration
 class LogChannel;
 
@@ -80,6 +88,25 @@ public:
 		return *this;
 	}
 
+	Logger& operator<<(Manip op) {
+
+		if (op == delline) {
+
+			{
+				boost::mutex::scoped_lock lock(FlushMutex);
+
+				std::ostream& s = *this;
+
+				// send cursor back
+				s << "\33[2K\r";
+
+				clearBuffer();
+			}
+		}
+
+		return *this;
+	}
+
 	Logger& operator<<(std::ostream&(*fp)(std::ostream&)) {
 
 		getBuffer() << fp;
@@ -98,6 +125,22 @@ public:
 			}
 
 			clearBuffer();
+		}
+
+		// flush the buffer content
+		if (fp == &std::flush<std::ostream::char_type, std::ostream::traits_type>) {
+
+			{
+				boost::mutex::scoped_lock lock(FlushMutex);
+
+				std::ostream& s = *this;
+
+				s << getBuffer().str();
+				s << std::flush;
+			}
+
+			// clear the current buffer
+			getBuffer().str("");
 		}
 
 		return *this;
