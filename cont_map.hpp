@@ -15,7 +15,7 @@ struct identity {
 
 	typedef T TargetType;
 
-	const TargetType& operator()(const T& t) { return t; }
+	const TargetType& operator()(const T& t) const { return t; }
 };
 
 /**
