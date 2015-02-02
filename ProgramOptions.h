@@ -18,9 +18,9 @@ namespace util {
 
 // forward declarations
 template <typename TargetType>
-class OptionConverter;
+struct OptionConverter;
 class program_option_impl;
-class ProgramOptionsCleanup;
+struct ProgramOptionsCleanup;
 
 // for sorting in the option set
 struct is_less {
@@ -52,7 +52,7 @@ public:
 
 private:
 
-	friend class ProgramOptionsCleanup;
+	friend struct ProgramOptionsCleanup;
 
 	ProgramOptions() {};
 

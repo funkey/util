@@ -242,7 +242,7 @@ class LogChannel {
 
   private:
 
-    friend class LoggerCleanup;
+    friend struct LoggerCleanup;
 
     static  std::set<LogChannel*>*  logChannels;
 
@@ -261,8 +261,6 @@ class LogChannel {
     Logger  _all;
 
     LogLevel  _level;
-
-    bool  _writeToFile;
 };
 
 class LogManager {

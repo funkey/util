@@ -79,14 +79,7 @@ private:
 	std::string _program_name;
 };
 
-template <class OS>
-std::ostream& operator<<(OS& out, const stack_trace_& trace) {
-
-	for (unsigned int i = 0; i < trace.get_stack_trace().size(); i++)
-		out << trace.get_stack_trace()[i] << std::endl;
-
-	return out;
-}
+std::ostream& operator<<(std::ostream& out, const stack_trace_& trace);
 
 typedef boost::error_info<struct tag_error_message, std::string> error_message;
 

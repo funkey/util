@@ -199,3 +199,11 @@ void handleException(const boost::exception& e, std::ostream& out) {
 		out << std::endl << std::endl;
 	}
 }
+
+std::ostream& operator<<(std::ostream& out, const stack_trace_& trace) {
+
+	for (unsigned int i = 0; i < trace.get_stack_trace().size(); i++)
+		out << trace.get_stack_trace()[i] << std::endl;
+
+	return out;
+}

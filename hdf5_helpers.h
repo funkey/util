@@ -80,7 +80,7 @@ write(H5::CommonFG& fg, std::string name, const std::vector<std::vector<T> >& da
 
 	// create an hdf5 dim vector
 	std::vector<hsize_t> hdims;
-	for (int i = 0; i < dims.size(); i++)
+	for (std::size_t i = 0; i < dims.size(); i++)
 		hdims.push_back(dims[i]);
 
 	// create the data space

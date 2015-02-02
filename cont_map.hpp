@@ -85,7 +85,7 @@ public:
 			_converter(converter) {
 
 			if (_i < 0)            _i = 0;
-			if (_i > _list.size()) _i = _list.size();
+			if (_i > static_cast<num_key_type>(_list.size())) _i = _list.size();
 
 			Direction::skip_invalids(_i);
 		}
@@ -252,7 +252,7 @@ public:
 		return std::make_pair(iterator(_list, k, _converter), contained);
 	}
 
-	iterator insert(iterator position, const value_type& value) {
+	iterator insert(iterator /*position*/, const value_type& value) {
 		return insert(value).first;
 	}
 	template <class InputIterator>
@@ -349,10 +349,10 @@ public:
 	}
 
 	std::pair<iterator,iterator> equal_range(const key_type& key) {
-		return std::make_pair(lower_bound(), upper_bound());
+		return std::make_pair(lower_bound(key), upper_bound(key));
 	}
 	std::pair<const_iterator,const_iterator> equal_range(const key_type& key) const {
-		return std::make_pair(lower_bound(), upper_bound());
+		return std::make_pair(lower_bound(key), upper_bound(key));
 	}
 
 	// allocator
@@ -366,7 +366,7 @@ private:
 	inline void accomodate(num_key_type k) {
 
 		// key is beyond current list size
-		if (k >= _list.size()) {
+		if (k >= static_cast<num_key_type>(_list.size())) {
 
 			// create new fields at the end, with keys that point to the 
 			// one-past last element (which is k+1)
