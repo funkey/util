@@ -136,6 +136,8 @@ util::point<T> operator/(const util::point<T>& p, const S& s) {
 	return result /= s;
 }
 
+namespace util {
+
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const util::point<T>& point) {
 
@@ -143,6 +145,8 @@ std::ostream& operator<<(std::ostream& os, const util::point<T>& point) {
 
 	return os;
 }
+
+} // namespace util
 
 #endif // UTIL_POINT_H__
 
