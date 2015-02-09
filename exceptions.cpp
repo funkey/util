@@ -1,4 +1,6 @@
+#ifdef __linux__
 #include <sys/prctl.h>
+#endif
 #include <sys/wait.h>
 
 #include <boost/lexical_cast.hpp>
@@ -12,6 +14,7 @@ logger::LogChannel tracelog("tracelog", "[trace] ");
 
 stack_trace_::stack_trace_() {
 
+#ifdef __linux__
 	std::string programName = get_program_name();
 	std::string pid         = get_pid();
 
@@ -111,6 +114,8 @@ stack_trace_::stack_trace_() {
 		// wait for the child to finish
 		waitpid(childPid, NULL, 0);
 	}
+
+#endif // __linux__
 
 	return;
 }
