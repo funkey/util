@@ -165,8 +165,10 @@ std::vector<T>& operator/=(std::vector<T>& lhs, U rhs) {
   return lhs;
 }
 
+namespace std {
+
 template<class T>
-std::ostream& operator<<(std::ostream& os, std::vector<T> vector) {
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
   os << "[";
 
@@ -181,3 +183,4 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> vector) {
   return os;
 }
 
+} // namespace std
