@@ -33,7 +33,7 @@ template <
 		typename Key,
 		typename T,
 		typename NumConverter = identity<Key>,
-		typename Alloc = std::allocator<std::pair<const typename NumConverter::TargetType, T> > >
+		typename Alloc = std::allocator<std::pair<Key, T> > >
 class cont_map {
 
 public:
