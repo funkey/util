@@ -198,6 +198,8 @@ public:
 	size_type size() { return _size; }
 	size_type max_size() { return _list.max_size(); }
 
+	double overhead() { return (double)_list.size()/size(); }
+
 	// element access
 	inline mapped_type& operator[](const key_type& key) {
 
