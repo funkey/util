@@ -27,16 +27,21 @@ TimingStatistics::~TimingStatistics() {
 	if (_timers.size() == 0)
 		return;
 
-	LOG_USER(timinglog) << "timing summary (user time):" << std::endl;
+	const std::string spacer("   ");
+
+	LOG_USER(timinglog)
+			<< "timing summary in seconds (user + system time):"
+			<< std::endl << std::endl;
 
 	for (int i = 0; i < _longestIdentifierLength; i++)
 		LOG_USER(timinglog) << " ";
-	LOG_USER(timinglog) << "\t# runs";
-	LOG_USER(timinglog) << "\tmean";
-	LOG_USER(timinglog) << "\tmin";
-	LOG_USER(timinglog) << "\tmax";
-	LOG_USER(timinglog) << "\tmedian";
-	LOG_USER(timinglog) << "\ttotal" << std::endl;;
+	LOG_USER(timinglog) << spacer;
+	LOG_USER(timinglog) << "   # runs" << spacer;
+	LOG_USER(timinglog) << "mean     " << spacer;
+	LOG_USER(timinglog) << "min      " << spacer;
+	LOG_USER(timinglog) << "max      " << spacer;
+	LOG_USER(timinglog) << "median   " << spacer;
+	LOG_USER(timinglog) << "total" << std::endl << std::endl;
 
 	for (const Timers::value_type& p : _timers) {
 
@@ -66,12 +71,15 @@ TimingStatistics::~TimingStatistics() {
 		for (int i = 0; i < _longestIdentifierLength - identifier.size(); i++)
 			LOG_USER(timinglog) << " ";
 		LOG_USER(timinglog) << identifier;
-		LOG_USER(timinglog) << "\t" << numRuns;
-		LOG_USER(timinglog) << "\t" << mean;
-		LOG_USER(timinglog) << "\t" << min;
-		LOG_USER(timinglog) << "\t" << max;
-		LOG_USER(timinglog) << "\t" << median;
-		LOG_USER(timinglog) << "\t" << total;
+		LOG_USER(timinglog) << spacer;
+		LOG_USER(timinglog) << std::setw(9) << std::setfill(' ');
+		LOG_USER(timinglog) << numRuns << spacer;
+		LOG_USER(timinglog) << std::scientific << std::setprecision(3);
+		LOG_USER(timinglog) << mean << spacer;
+		LOG_USER(timinglog) << min << spacer;
+		LOG_USER(timinglog) << max << spacer;
+		LOG_USER(timinglog) << median << spacer;
+		LOG_USER(timinglog) << total;
 		LOG_USER(timinglog) << std::endl;
 	}
 }
