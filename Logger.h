@@ -72,6 +72,11 @@ public:
 		_showChannelPrefix = show;
 	}
 
+	static void showThreadId(bool show) {
+
+		_showThreadId = show;
+	}
+
 	template <typename T>
 	Logger& operator<<(T* t) {
 
@@ -186,7 +191,9 @@ private:
 
 	std::string getPrefix() {
 
-		return boost::lexical_cast<std::string>(boost::this_thread::get_id()) + " " + _prefix;
+		if (_showThreadId)
+			return boost::lexical_cast<std::string>(boost::this_thread::get_id()) + " " + _prefix;
+		return _prefix;
 	}
 
 	// reference to the owning LogChannel's prefix
@@ -194,6 +201,7 @@ private:
 
 	// show the prefix for all channels
 	static bool _showChannelPrefix;
+	static bool _showThreadId;
 
 	// thread local buffer
 	boost::thread_specific_ptr<std::stringstream> _buffer;

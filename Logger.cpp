@@ -67,9 +67,16 @@ util::ProgramOption showChannelPrefix(
 		util::_module = "Logging",
 		util::_long_name = "show-channel-prefix",
 		util::_description_text =
-		"Show the thread id and channel prefix for every line of output."
+		"Show the channel prefix for every line of output."
 		"True by default.",
 		util::_default_value = true);
+
+util::ProgramOption showThreadId(
+		util::_module = "Logging",
+		util::_long_name = "show-thread-id",
+		util::_description_text =
+		"Show the thread id in the channel prefix for every line of output."
+		"False by default.");
 
 Logger glutton(0, "");
 
@@ -201,6 +208,7 @@ LogFileManager::openFile(std::string filename) {
 
 boost::mutex Logger::FlushMutex;
 bool Logger::_showChannelPrefix = true;
+bool Logger::_showThreadId      = false;
 
 Logger::Logger(std::streambuf* streamBuffer, const std::string& prefix) :
   std::ostream(streamBuffer),
@@ -250,6 +258,7 @@ LogManager::init()
 
   // read from program options
   Logger::showChannelPrefix(showChannelPrefix);
+  Logger::showThreadId(showThreadId);
 
   // set channel log levels
   if (channelLevel) {
