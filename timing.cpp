@@ -68,9 +68,9 @@ TimingStatistics::~TimingStatistics() {
 		double max    = times[numRuns - 1];
 		double median = times[numRuns/2];
 
+		LOG_USER(timinglog) << identifier;
 		for (int i = 0; i < _longestIdentifierLength - identifier.size(); i++)
 			LOG_USER(timinglog) << " ";
-		LOG_USER(timinglog) << identifier;
 		LOG_USER(timinglog) << spacer;
 		LOG_USER(timinglog) << std::setw(9) << std::setfill(' ');
 		LOG_USER(timinglog) << numRuns << spacer;

@@ -4,6 +4,9 @@
 #include <map>
 #include <vector>
 #include <boost/timer/timer.hpp>
+#include "typename.h"
+
+#define UTIL_TIME_METHOD Timer __util_method_timer(typeName(*this) + "::" + __FUNCTION__ + "()");
 
 class Timer;
 
