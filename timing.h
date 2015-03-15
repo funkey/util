@@ -6,7 +6,8 @@
 #include <boost/timer/timer.hpp>
 #include "typename.h"
 
-#define UTIL_TIME_METHOD Timer __util_method_timer(typeName(*this) + "::" + __FUNCTION__ + "()");
+#define UTIL_TIME_SCOPE(name) Timer __util_scope_timer(name);
+#define UTIL_TIME_METHOD      Timer __util_method_timer(typeName(*this) + "::" + __FUNCTION__ + "()");
 
 class Timer;
 
