@@ -60,12 +60,11 @@ TimingStatistics::~TimingStatistics() {
 
 		double mean = total/numRuns;
 
-		std::nth_element(times.begin(), times.end(), times.begin());
-		std::nth_element(times.begin(), times.end(), times.begin() + numRuns - 1);
-		std::nth_element(times.begin(), times.end(), times.begin() + numRuns/2);
-
+		std::nth_element(times.begin(), times.begin(), times.end());
 		double min    = times[0];
+		std::nth_element(times.begin(), times.begin() + numRuns - 1, times.end());
 		double max    = times[numRuns - 1];
+		std::nth_element(times.begin(), times.begin() + numRuns/2, times.end());
 		double median = times[numRuns/2];
 
 		LOG_USER(timinglog) << identifier;
