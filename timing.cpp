@@ -1,7 +1,7 @@
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
 #include "timing.h"
-#include "Logger.h"
-
-logger::LogChannel timinglog("timinglog", "[TimingStatistics] ");
 
 TimingStatistics TimingStatistics::_instance;
 
@@ -29,19 +29,19 @@ TimingStatistics::~TimingStatistics() {
 
 	const std::string spacer("   ");
 
-	LOG_USER(timinglog)
+	std::cout
 			<< "timing summary in seconds (wall time):"
 			<< std::endl << std::endl;
 
 	for (int i = 0; i < _longestIdentifierLength; i++)
-		LOG_USER(timinglog) << " ";
-	LOG_USER(timinglog) << spacer;
-	LOG_USER(timinglog) << "   # runs" << spacer;
-	LOG_USER(timinglog) << "mean     " << spacer;
-	LOG_USER(timinglog) << "min      " << spacer;
-	LOG_USER(timinglog) << "max      " << spacer;
-	LOG_USER(timinglog) << "median   " << spacer;
-	LOG_USER(timinglog) << "total" << std::endl << std::endl;
+		std::cout << " ";
+	std::cout << spacer;
+	std::cout << "   # runs" << spacer;
+	std::cout << "mean     " << spacer;
+	std::cout << "min      " << spacer;
+	std::cout << "max      " << spacer;
+	std::cout << "median   " << spacer;
+	std::cout << "total" << std::endl << std::endl;
 
 	for (const Timers::value_type& p : _timers) {
 
@@ -67,19 +67,19 @@ TimingStatistics::~TimingStatistics() {
 		std::nth_element(times.begin(), times.begin() + numRuns/2, times.end());
 		double median = times[numRuns/2];
 
-		LOG_USER(timinglog) << identifier;
+		std::cout << identifier;
 		for (int i = 0; i < _longestIdentifierLength - identifier.size(); i++)
-			LOG_USER(timinglog) << " ";
-		LOG_USER(timinglog) << spacer;
-		LOG_USER(timinglog) << std::setw(9) << std::setfill(' ');
-		LOG_USER(timinglog) << numRuns << spacer;
-		LOG_USER(timinglog) << std::scientific << std::setprecision(3);
-		LOG_USER(timinglog) << mean << spacer;
-		LOG_USER(timinglog) << min << spacer;
-		LOG_USER(timinglog) << max << spacer;
-		LOG_USER(timinglog) << median << spacer;
-		LOG_USER(timinglog) << total;
-		LOG_USER(timinglog) << std::endl;
+			std::cout << " ";
+		std::cout << spacer;
+		std::cout << std::setw(9) << std::setfill(' ');
+		std::cout << numRuns << spacer;
+		std::cout << std::scientific << std::setprecision(3);
+		std::cout << mean << spacer;
+		std::cout << min << spacer;
+		std::cout << max << spacer;
+		std::cout << median << spacer;
+		std::cout << total;
+		std::cout << std::endl;
 	}
 }
 
