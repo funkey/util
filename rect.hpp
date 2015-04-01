@@ -14,7 +14,7 @@ struct rect {
 	/**
 	 * Default constructor.
 	 */
-	rect() {};
+	rect() : minX(0), minY(0), maxX(0), maxY(0) {};
 
 	template <typename S>
 	rect(const rect<S>& other) :
