@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "point.hpp"
+#include "rect.hpp"
 
 namespace util {
 
@@ -56,13 +57,13 @@ struct box {
 		return maxZ - minZ;
 	}
 
-	bool valid() { return volume() > 0; }
+	bool valid() { return isZero(); }
 
 	template <typename S>
 	bool intersects(const box<S>& other) const {
 
 		// empty boxes do not intersect
-		if (volume() <= 0 || other.volume() <= 0)
+		if (isZero() || other.isZero())
 			return false;
 
 		// two non-intersecting boxes are separated by a plane parallel to
@@ -116,6 +117,15 @@ struct box {
 		return contains(point[0], point[1], point[2]);
 	}
 
+	template <typename S>
+	bool contains(const point<S>& point) const {
+
+		if (maxX <= point.x || minX > point.x || maxY <= point.y || minY > point.y)
+			return false;
+
+		return true;
+	}
+
 	/**
 	 * Extend this box, such that it fits the given point.
 	 */
@@ -139,6 +149,27 @@ struct box {
 		maxX = std::max(point[0], maxX);
 		maxY = std::max(point[1], maxY);
 		maxZ = std::max(point[2], maxZ);
+	}
+
+	/**
+	 * Extend the x and y dimensions of the box, such that it fits the given 
+	 * rectangle.
+	 */
+	void fit(const rect<T>& rect) {
+
+		if (isZero()) {
+
+			minX = rect.minX;
+			minY = rect.minY;
+			maxX = rect.maxX;
+			maxY = rect.maxY;
+			return;
+		}
+
+		minX = std::min(rect.minX, minX);
+		minY = std::min(rect.minY, minY);
+		maxX = std::max(rect.maxX, maxX);
+		maxY = std::max(rect.maxY, maxY);
 	}
 
 	/**
@@ -170,7 +201,7 @@ struct box {
 	}
 
 	/**
-	 * Add two bounding boxes, i.e., create one that fits both.
+	 * Add two boxes, i.e., create one that fits both.
 	 */
 	box<T> operator+(const box<T>& other) const {
 
