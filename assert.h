@@ -7,31 +7,6 @@ namespace util {
 
 class AssertionFailed : public Exception {};
 
-inline void assert_failed(const char* expr, const char* func, int line, const char* file) {
-
-	UTIL_THROW_EXCEPTION(
-			AssertionFailed,
-			"\"" << expr << "\" failed in " << func << ", " << file << ":" << line);
-}
-
-template <typename L, typename R>
-void assert_rel_failed(
-		const char* left,
-		const char* op,
-		const char* right,
-		const L&    l,
-		const R&    r,
-		const char* func,
-		int line,
-		const char* file) {
-
-	UTIL_THROW_EXCEPTION(
-			AssertionFailed,
-			"\"" << left << " " << op << " " << right << "\" ==> " <<
-			l << " " << op << " " << r <<
-			" failed in " << func << ", " << file << ":" << line);
-}
-
 }
 
 #ifdef NDEBUG
@@ -41,8 +16,20 @@ void assert_rel_failed(
 
 #else // DEBUG
 
-#define UTIL_ASSERT(expr)                if (!(expr))          { ::util::assert_failed(#expr, __func__, __LINE__, __FILE__); }
-#define UTIL_ASSERT_REL(left, op, right) if (!(left op right)) { ::util::assert_rel_failed(#left, #op, #right, left, right, __func__, __LINE__, __FILE__); }
+#define UTIL_ASSERT(expr)                if (!(expr))          { \
+	UTIL_THROW_EXCEPTION(                                        \
+			util::AssertionFailed,                               \
+			"\"" << #expr << "\" failed in " <<                  \
+			__func__ << ", " << __FILE__ << ":" << __LINE__);    \
+}
+
+#define UTIL_ASSERT_REL(left, op, right) if (!(left op right)) {                \
+	UTIL_THROW_EXCEPTION(                                                       \
+			util::AssertionFailed,                                                    \
+			"\"" << #left << " " << #op << " " << #right << "\" ==> " <<        \
+			left << " " << #op << " " << right <<                               \
+			" failed in " << __func__ << ", " << __FILE__ << ":" << __LINE__);  \
+}
 
 #endif
 
