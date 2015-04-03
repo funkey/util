@@ -118,9 +118,9 @@ struct box {
 	}
 
 	template <typename S>
-	bool contains(const point<S>& point) const {
+	bool contains(const point<S,2>& point) const {
 
-		if (maxX <= point.x || minX > point.x || maxY <= point.y || minY > point.y)
+		if (maxX <= point.x() || minX > point.x() || maxY <= point.y() || minY > point.y())
 			return false;
 
 		return true;

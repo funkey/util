@@ -44,29 +44,29 @@ struct rect {
 		return maxY - minY;
 	}
 
-	point<T> upperLeft() const {
+	point<T,2> upperLeft() const {
 
-		return point<T>(minX, minY);
+		return point<T,2>(minX, minY);
 	}
 
-	point<T> lowerRight() const {
+	point<T,2> lowerRight() const {
 
-		return point<T>(maxX, maxY);
+		return point<T,2>(maxX, maxY);
 	}
 
-	point<T> upperRight() const {
+	point<T,2> upperRight() const {
 
-		return point<T>(maxX, minY);
+		return point<T,2>(maxX, minY);
 	}
 
-	point<T> lowerLeft() const {
+	point<T,2> lowerLeft() const {
 
-		return point<T>(minX, maxY);
+		return point<T,2>(minX, maxY);
 	}
 
-	point<T> center() const {
+	point<T,2> center() const {
 
-		return point<T>((minX + maxX)/2, (minY + maxY)/2);
+		return point<T,2>((minX + maxX)/2, (minY + maxY)/2);
 	}
 
 	template <typename S>
@@ -106,9 +106,9 @@ struct rect {
 		return result;
 	}
 
-	bool contains(const point<T>& point) const {
+	bool contains(const point<T,2>& point) const {
 
-		return minX <= point.x && minY <= point.y && maxX > point.x && maxY > point.y;
+		return minX <= point.x() && minY <= point.y() && maxX > point.x() && maxY > point.y();
 	}
 
 	bool contains(const rect<T>& other) const {
@@ -119,21 +119,21 @@ struct rect {
 	/**
 	 * Extend this rect, such that it fits the given point.
 	 */
-	void fit(const point<T>& point) {
+	void fit(const point<T,2>& point) {
 
 		if (isZero()) {
 
-			minX = point.x;
-			maxX = point.x;
-			minY = point.y;
-			maxY = point.y;
+			minX = point.x();
+			maxX = point.x();
+			minY = point.y();
+			maxY = point.y();
 			return;
 		}
 
-		minX = std::min(point.x, minX);
-		minY = std::min(point.y, minY);
-		maxX = std::max(point.x, maxX);
-		maxY = std::max(point.y, maxY);
+		minX = std::min(point.x(), minX);
+		minY = std::min(point.y(), minY);
+		maxX = std::max(point.x(), maxX);
+		maxY = std::max(point.y(), maxY);
 	}
 
 	/**
@@ -164,23 +164,23 @@ struct rect {
 	}
 
 	template <typename S>
-	rect<T>& operator+=(const point<S>& other) {
+	rect<T>& operator+=(const point<S,2>& other) {
 
-		minX += other.x;
-		maxX += other.x;
-		minY += other.y;
-		maxY += other.y;
+		minX += other.x();
+		maxX += other.x();
+		minY += other.y();
+		maxY += other.y();
 
 		return *this;
 	}
 
 	template <typename S>
-	rect<T>& operator-=(const point<S>& other) {
+	rect<T>& operator-=(const point<S,2>& other) {
 
-		minX -= other.x;
-		maxX -= other.x;
-		minY -= other.y;
-		maxY -= other.y;
+		minX -= other.x();
+		maxX -= other.x();
+		minY -= other.y();
+		maxY -= other.y();
 
 		return *this;
 	}
@@ -208,23 +208,23 @@ struct rect {
 	}
 
 	template <typename S>
-	rect<T>& operator*=(const point<S>& p) {
+	rect<T>& operator*=(const point<S,2>& p) {
 
-		minX *= p.x;
-		maxX *= p.x;
-		minY *= p.y;
-		maxY *= p.y;
+		minX *= p.x();
+		maxX *= p.x();
+		minY *= p.y();
+		maxY *= p.y();
 
 		return *this;
 	}
 
 	template <typename S>
-	rect<T>& operator/=(const point<S>& p) {
+	rect<T>& operator/=(const point<S,2>& p) {
 
-		minX /= p.x;
-		maxX /= p.x;
-		minY /= p.y;
-		maxY /= p.y;
+		minX /= p.x();
+		maxX /= p.x();
+		minY /= p.y();
+		maxY /= p.y();
 
 		return *this;
 	}
@@ -248,7 +248,7 @@ struct rect {
 } // namespace util
 
 template <typename T, typename S>
-util::rect<T> operator+(const util::rect<T>& p, const util::point<S>& o) {
+util::rect<T> operator+(const util::rect<T>& p, const util::point<S,2>& o) {
 
 	util::rect<T> result(p);
 
@@ -256,7 +256,7 @@ util::rect<T> operator+(const util::rect<T>& p, const util::point<S>& o) {
 }
 
 template <typename T, typename S>
-util::rect<T> operator-(const util::rect<T>& p, const util::point<S>& o) {
+util::rect<T> operator-(const util::rect<T>& p, const util::point<S,2>& o) {
 
 	util::rect<T> result(p);
 
