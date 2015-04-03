@@ -56,8 +56,7 @@ public:
 	template <typename S>
 	Derived& operator*=(const S& s) {
 
-		for (int i = 0; i < N; i++)
-			_a[i] *= s;
+		mul(s, typename std::is_arithmetic<S>::type());
 
 		return static_cast<Derived&>(*this);
 	}
@@ -65,8 +64,7 @@ public:
 	template <typename S>
 	Derived& operator/=(const S& s) {
 
-		for (int i = 0; i < N; i++)
-			_a[i] /= s;
+		div(s, typename std::is_arithmetic<S>::type());
 
 		return static_cast<Derived&>(*this);
 	}
@@ -110,6 +108,36 @@ public:
 protected:
 
 	std::array<T, N> _a;
+
+private:
+
+	template <typename S>
+	void mul(S s, std::true_type is_arithmetic) {
+
+		for (int i = 0; i < N; i++)
+			_a[i] *= s;
+	}
+
+	template <typename S>
+	void mul(S s, std::false_type is_arithmetic) {
+
+		for (int i = 0; i < N; i++)
+			_a[i] *= s[i];
+	}
+
+	template <typename S>
+	void div(S s, std::true_type is_arithmetic) {
+
+		for (int i = 0; i < N; i++)
+			_a[i] /= s;
+	}
+
+	template <typename S>
+	void div(S s, std::false_type is_arithmetic) {
+
+		for (int i = 0; i < N; i++)
+			_a[i] /= s[i];
+	}
 };
 
 template <typename T, int N>
@@ -141,6 +169,37 @@ public:
 	inline const T& y() const { return data()[1]; }
 	inline T& x() { return data()[0]; }
 	inline T& y() { return data()[1]; }
+};
+
+template <typename T>
+class point<T, 3> : public point_base<point<T, 3>, T, 3> {
+
+	typedef point_base<point<T, 3>, T, 3> base_type;
+
+public:
+
+	point() {};
+
+	template <typename S>
+	point(const S& x_, const S& y_, const S& z_) {
+
+		x() = x_;
+		y() = y_;
+		z() = z_;
+	}
+
+	template <typename S>
+	point(const point<S, 3>& other) :
+		base_type(other) {}
+
+	using base_type::data;
+
+	inline const T& x() const { return data()[0]; }
+	inline const T& y() const { return data()[1]; }
+	inline const T& z() const { return data()[2]; }
+	inline T& x() { return data()[0]; }
+	inline T& y() { return data()[1]; }
+	inline T& z() { return data()[2]; }
 };
 
 } // namespace util
