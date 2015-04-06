@@ -7,6 +7,10 @@
 
 namespace util {
 
+// forward declaration
+template <typename T, int N>
+class point;
+
 template <typename Derived, typename T, int N>
 class point_base {
 
@@ -100,6 +104,27 @@ public:
 	bool operator!=(const point_base<D, S, N>& other) const {
 
 		return !(*this == other);
+	}
+
+	template <int M>
+	explicit operator point<T,M>() const {
+
+		point<T,M> projected;
+		for (int i = 0; i < std::min(N, M); i++)
+			projected[i] = _a[i];
+
+		return projected;
+	}
+
+	/**
+	 * Project to a different dimension. If the target dimension is smaller, the 
+	 * last components of the point are simply discarded. If the target 
+	 * dimension is larger, new zero-initialized components are added.
+	 */
+	template <int M>
+	point<T,M> project() const {
+
+		return static_cast<util::point<T,M>>(*this);
 	}
 
 	inline const std::array<T, N>& data() const { return _a; }
