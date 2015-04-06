@@ -43,6 +43,8 @@ public:
 
 	bool valid() { return isZero(); }
 
+	point<T,N> center() const { return (_min + _max)/2.0; }
+
 	template <typename D, typename S>
 	bool intersects(const box_base<D,S,N>& other) const {
 
