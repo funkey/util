@@ -226,8 +226,8 @@ util::point<T, N> operator*(const util::point<T, N>& p, const S& s) {
 	return result *= s;
 }
 
-template <typename T, int N>
-util::point<T, N> operator*(const T& s, const util::point<T, N>& p) {
+template <typename T, typename S, int N>
+util::point<T, N> operator*(const S& s, const util::point<T, N>& p) {
 
 	util::point<T, N> result(p);
 
