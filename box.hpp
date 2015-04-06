@@ -249,12 +249,6 @@ public:
 
 	box() : base_type() {}
 
-	template <typename S>
-	box(const S& minX, const S& minY, const S& maxX, const S& maxY) :
-		base_type(
-				point<T,2>(minX, minY),
-				point<T,2>(maxX, maxY)) {}
-
 	box(T minX, T minY, T maxX, T maxY) :
 		base_type(
 				point<T,2>(minX, minY),
@@ -301,12 +295,6 @@ class box<T, 3> : public box_base<box<T, 3>, T, 3> {
 public:
 
 	box() : base_type() {}
-
-	template <typename S>
-	box(const S& minX, const S& minY, const S& minZ, const S& maxX, const S& maxY, const S& maxZ) :
-		base_type(
-				point<T,3>(minX, minY, minZ),
-				point<T,3>(maxX, maxY, maxZ)) {}
 
 	box(T minX, T minY, T minZ, T maxX, T maxY, T maxZ) :
 		base_type(

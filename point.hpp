@@ -152,8 +152,7 @@ public:
 
 	point() {};
 
-	template <typename S>
-	point(const S& x_, const S& y_) {
+	point(T x_, T y_) {
 
 		x() = x_;
 		y() = y_;
@@ -180,8 +179,7 @@ public:
 
 	point() {};
 
-	template <typename S>
-	point(const S& x_, const S& y_, const S& z_) {
+	point(T x_, T y_, T z_) {
 
 		x() = x_;
 		y() = y_;
