@@ -39,6 +39,16 @@ point<T,3> rotate3d(const ray<T,3>& ray, T degrees, point<T,3> point) {
 	return point;
 }
 
+template <typename T, int N>
+T length(const util::point<T,N>& p) {
+
+	T sumSquared = 0;
+	for (int i = 0; i < N; i++)
+		sumSquared += p[i]*p[i];
+
+	return sqrt(sumSquared);
+}
+
 } // namespace util
 
 #endif // UTIL_GEOMETRY_H__
