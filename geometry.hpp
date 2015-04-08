@@ -2,8 +2,42 @@
 #define UTIL_GEOMETRY_H__
 
 #include "ray.hpp"
+#include "plane.hpp"
 
 namespace util {
+
+/**
+ * Dot product between two points.
+ */
+template <typename T, int N>
+T dot(const util::point<T,N>& a, const util::point<T,N>& b) {
+
+	T sum = 0;
+	for (int i = 0; i < N; i++)
+		sum += a[i]*b[i];
+	return sum;
+}
+
+/**
+ * Cross product (only for N=3).
+ */
+template <typename T>
+util::point<T,3> cross(const util::point<T,3>& a, const util::point<T,3>& b) {
+
+	return util::point<T,3>(
+			a.y()*b.z() - a.z()*b.y(),
+			a.z()*b.x() - a.x()*b.z(),
+			a.x()*b.y() - a.y()*b.x());
+}
+
+/**
+ * Euclidean length of a vector.
+ */
+template <typename T, int N>
+T length(const util::point<T,N>& p) {
+
+	return sqrt(dot(p, p));
+}
 
 /**
  * Rotate a point around a ray by the given number of degrees.
@@ -19,19 +53,16 @@ point<T,3> rotate3d(const ray<T,3>& ray, T degrees, point<T,3> point) {
 	axis /= length;
 
 	// axis x point
-	util::point<T,3> cross;
-	cross.x() = axis.y()*point.z() - axis.z()*point.y();
-	cross.y() = axis.z()*point.x() - axis.x()*point.z();
-	cross.z() = axis.x()*point.y() - axis.y()*point.x();
+	util::point<T,3> c = cross(axis, point);
 
 	// axis * point
-	T dot = axis.x()*point.x() + axis.y()*point.y() + axis.z()*point.z();
+	T d = dot(axis, point);
 
 	T cosDeg = cos(degrees);
 	T sinDeg = sin(degrees);
 
 	// rotate around axis direction
-	point = cosDeg*point + sinDeg*(cross) + (1 - cosDeg)*dot*axis;
+	point = cosDeg*point + sinDeg*c + (1 - cosDeg)*d*axis;
 
 	// move back
 	point += ray.position();
@@ -39,14 +70,22 @@ point<T,3> rotate3d(const ray<T,3>& ray, T degrees, point<T,3> point) {
 	return point;
 }
 
+/**
+ * Find the intersection position of a ray with a plane. The return value is 
+ * true, if the ray intersects the plane. In this case, parameter t is set such 
+ * that ray.position() + t*ray.direction() is the intersection point.
+ */
 template <typename T, int N>
-T length(const util::point<T,N>& p) {
+bool intersect(const plane<T,N>& p, const ray<T,N>& r, T& t) {
 
-	T sumSquared = 0;
-	for (int i = 0; i < N; i++)
-		sumSquared += p[i]*p[i];
+	T dot_rp = dot(r.direction(), p.normal());
 
-	return sqrt(sumSquared);
+	if (dot_rp == 0)
+		return false;
+
+	t = dot(p.position() - r.position(), p.normal())/dot_rp;
+
+	return true;
 }
 
 } // namespace util

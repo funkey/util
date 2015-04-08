@@ -274,7 +274,7 @@ std::ostream& operator<<(std::ostream& os, const util::point<T, N>& point) {
 
 	os << "(";
 	for (int i = 0; i < N; i++)
-		os << point[i] << (i == N-1 ? " " : ", ");
+		os << point[i] << (i == N-1 ? "" : ", ");
 	os << ")";
 
 	return os;

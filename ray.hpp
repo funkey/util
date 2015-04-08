@@ -22,6 +22,8 @@ public:
 	const point<T,N>& direction() const { return _direction; }
 	point<T,N>& direction() { return _direction; }
 
+	point<T,N> at(T t) { return _position + t*_direction; }
+
 private:
 
 	point<T,N> _position;
