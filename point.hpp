@@ -137,28 +137,28 @@ protected:
 private:
 
 	template <typename S>
-	void mul(S s, std::true_type is_arithmetic) {
+	void mul(S s, std::true_type /*is_arithmetic*/) {
 
 		for (int i = 0; i < N; i++)
 			_a[i] *= s;
 	}
 
 	template <typename S>
-	void mul(S s, std::false_type is_arithmetic) {
+	void mul(S s, std::false_type /*is_arithmetic*/) {
 
 		for (int i = 0; i < N; i++)
 			_a[i] *= s[i];
 	}
 
 	template <typename S>
-	void div(S s, std::true_type is_arithmetic) {
+	void div(S s, std::true_type /*is_arithmetic*/) {
 
 		for (int i = 0; i < N; i++)
 			_a[i] /= s;
 	}
 
 	template <typename S>
-	void div(S s, std::false_type is_arithmetic) {
+	void div(S s, std::false_type /*is_arithmetic*/) {
 
 		for (int i = 0; i < N; i++)
 			_a[i] /= s[i];
