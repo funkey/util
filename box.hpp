@@ -108,8 +108,8 @@ public:
 
 		for (int i = 0; i < N; i++) {
 
-			min()[i] = std::min(point[i], min()[i]);
-			max()[i] = std::max(point[i], max()[i]);
+			min()[i] = std::min((T)point[i], min()[i]);
+			max()[i] = std::max((T)point[i], max()[i]);
 		}
 	}
 
