@@ -162,7 +162,7 @@ public:
 	bool isZero() const {
 
 		for (int i = 0; i < N; i++)
-			if (min()[i] != 0 || min()[i] != 0)
+			if (min()[i] != 0 || max()[i] != 0)
 				return false;
 
 		return true;
