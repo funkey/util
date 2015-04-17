@@ -27,6 +27,13 @@ private:
 	util::point<T,N> _normal;
 };
 
+template <typename T, int N>
+std::ostream& operator<<(std::ostream& os, const util::plane<T,N>& plane) {
+
+	os << "{" << plane.position() << ": " << plane.normal() << "}";
+	return os;
+}
+
 } // namespace util
 
 #endif // UTIL_PLANE_H__
