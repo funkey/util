@@ -383,13 +383,17 @@ util::box<T,N> operator/(const util::box<T,N>& p, const S& s) {
 	return result /= s;
 }
 
+namespace util {
+
 template <typename T, int N>
-std::ostream& operator<<(std::ostream& os, const util::box<T,N>& box) {
+std::ostream& operator<<(std::ostream& os, const box<T,N>& box) {
 
 	os <<  "[" << box.min() << ", " << box.max() << "]";
 
 	return os;
 }
+
+} // namespace util
 
 #endif // UTIL_BOX_H__
 

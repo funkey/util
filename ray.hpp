@@ -22,7 +22,7 @@ public:
 	const point<T,N>& direction() const { return _direction; }
 	point<T,N>& direction() { return _direction; }
 
-	point<T,N> at(T t) { return _position + t*_direction; }
+	point<T,N> at(T t) const { return _position + t*_direction; }
 
 private:
 
@@ -30,14 +30,14 @@ private:
 	point<T,N> _direction;
 };
 
-} // namespace util
-
 template <typename T, int N>
 std::ostream& operator<<(std::ostream& os, const util::ray<T,N>& ray) {
 
 	os << "{" << ray.position() << "->" << ray.direction() << "}";
 	return os;
 }
+
+} // namespace util
 
 #endif // UTIL_RAY_H__
 
