@@ -100,9 +100,6 @@ bool intersect(const box<T,N>& b, const ray<T,N>& r, T& t) {
 
 	bool intersects = false;
 
-	std::cout << "box " << b << std::endl;
-	std::cout << "ray " << r << std::endl;
-
 	for (int d = 0; d < N; d++) {
 
 		point<T,N> normal;
@@ -120,17 +117,17 @@ bool intersect(const box<T,N>& b, const ray<T,N>& r, T& t) {
 				bool onFace = true;
 				util::point<T,N> p = r.at(t_);
 
-				for (int td = 0; td < N; td++) {
+				for (unsigned int td = 0; td < N; td++) {
 					if (td == d)
 						continue;
-					if (p[d] < b.min()[d] || p[d] >= b.max()[d]) {
+
+					if (p[td] < b.min()[td] || p[td] >= b.max()[td]) {
 						onFace = false;
 						break;
 					}
 				}
 
 				if (onFace) {
-					std::cout << "intersecting at " << p << std::endl;
 					intersects = true;
 					t = std::min(t, t_);
 				}
