@@ -3,6 +3,7 @@
 
 #include "ray.hpp"
 #include "plane.hpp"
+#include "box.hpp"
 
 namespace util {
 
@@ -86,6 +87,58 @@ bool intersect(const plane<T,N>& p, const ray<T,N>& r, T& t) {
 	t = dot(p.position() - r.position(), p.normal())/dot_rp;
 
 	return true;
+}
+
+/**
+ * Find the intersection position of a ray with a box. The return value is true, 
+ * if the ray intersects the box. In this case, parameter t is set such that 
+ * ray.position() + t*ray.direction() is the closest intersection point 
+ * (smallest t).
+ */
+template <typename T, int N>
+bool intersect(const box<T,N>& b, const ray<T,N>& r, T& t) {
+
+	bool intersects = false;
+
+	std::cout << "box " << b << std::endl;
+	std::cout << "ray " << r << std::endl;
+
+	for (int d = 0; d < N; d++) {
+
+		point<T,N> normal;
+		normal[d] = 1;
+
+		plane<T,N> facePlanes[2] = {
+				plane<T,N>(b.min(), normal),
+				plane<T,N>(b.max(), normal)
+		};
+
+		T t_;
+		for (int i = 0; i < 2; i++) {
+			if (intersect(facePlanes[i], r, t_)) {
+
+				bool onFace = true;
+				util::point<T,N> p = r.at(t_);
+
+				for (int td = 0; td < N; td++) {
+					if (td == d)
+						continue;
+					if (p[d] < b.min()[d] || p[d] >= b.max()[d]) {
+						onFace = false;
+						break;
+					}
+				}
+
+				if (onFace) {
+					std::cout << "intersecting at " << p << std::endl;
+					intersects = true;
+					t = std::min(t, t_);
+				}
+			}
+		}
+	}
+
+	return intersects;
 }
 
 } // namespace util
