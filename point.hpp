@@ -31,6 +31,14 @@ public:
 	const T& operator[](int i) const { return _a[i]; }
 	T& operator[](int i) { return _a[i]; }
 
+	bool isZero() const {
+
+		for (int i = 0; i < N; i++)
+			if (_a[i] != 0)
+				return false;
+		return true;
+	}
+
 	template <typename D, typename S>
 	Derived& operator+=(const point_base<D, S, N>& other) {
 
