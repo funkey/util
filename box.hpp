@@ -120,6 +120,9 @@ public:
 	template <typename D, typename S, int M>
 	void fit(const box_base<D,S,M>& other) {
 
+		if (other.isZero())
+			return;
+
 		if (isZero()) {
 
 			for (int i = 0; i < std::min(N, M); i++) {
