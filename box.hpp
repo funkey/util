@@ -225,6 +225,19 @@ public:
 		return !(*this == other);
 	}
 
+	/**
+	 * Project to a different dimension. If the target dimension is smaller, the 
+	 * last components of the point are simply discarded. If the target 
+	 * dimension is larger, new zero-initialized components are added.
+	 */
+	template <int M>
+	box<T,M> project() const {
+
+		return box_base<box<T,M>, T, M>(
+				_min.project<M>(),
+				_max.project<M>());
+	}
+
 private:
 
 	point<T,N> _min;
