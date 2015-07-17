@@ -234,8 +234,8 @@ public:
 	box<T,M> project() const {
 
 		return box_base<box<T,M>, T, M>(
-				_min.project<M>(),
-				_max.project<M>());
+				_min.template project<M>(),
+				_max.template project<M>());
 	}
 
 private:
