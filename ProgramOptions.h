@@ -13,6 +13,7 @@
 #include <boost/program_options.hpp>
 
 #include <util/typename.h>
+#include <util/exceptions.h>
 
 namespace util {
 
@@ -195,7 +196,18 @@ struct OptionConverter {
 
 	TargetType operator()(const program_option_impl& option) const {
 
-		return boost::lexical_cast<TargetType>(ProgramOptions::getOptionValue(option));
+		try {
+
+			return boost::lexical_cast<TargetType>(ProgramOptions::getOptionValue(option));
+
+		} catch (boost::bad_lexical_cast& e) {
+
+			UTIL_THROW_EXCEPTION(
+					UsageError,
+					"program option " << option.getLongParam() <<
+					" with value " << ProgramOptions::getOptionValue(option) <<
+					" can not be (lexically) cast into " << typeName(TargetType()));
+		}
 	}
 };
 
