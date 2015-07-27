@@ -50,86 +50,95 @@ is_less::operator()(program_option_impl* left, program_option_impl* right) {
 void
 ProgramOptions::init(int argc, char** argv, bool ignoreUnknown) {
 
-	BinaryName = argv[0];
+	try {
 
-	if (Options == 0)
-		Options = new std::set<program_option_impl*, is_less>();
+		BinaryName = argv[0];
 
-	if (KnownLongParams == 0)
-		KnownLongParams = new std::set<std::string>();
+		if (Options == 0)
+			Options = new std::set<program_option_impl*, is_less>();
 
-	// get all options
-	boost::program_options::variables_map values;
-	if (ignoreUnknown)
-		boost::program_options::store(
-				boost::program_options::command_line_parser(argc, argv).
-				options(*CommandLineOptions).
-				positional(*Positional).
-				allow_unregistered().
-				run(),
-				values);
-	else
-		boost::program_options::store(
-				boost::program_options::command_line_parser(argc, argv).
-				options(*CommandLineOptions).
-				positional(*Positional).
-				run(),
-				values);
-	boost::program_options::notify(values);
+		if (KnownLongParams == 0)
+			KnownLongParams = new std::set<std::string>();
 
-	// set initial program option values
-	foreach(program_option_impl* option, *Options) {
-
-		if (values.count(option->getLongParam()))
-			Values[option] = values[option->getLongParam()].as<std::string>();
-
-		if (option->getModuleName() != "")
-			if (values.count(option->getModuleName() + "." + option->getLongParam()))
-				Values[option] = values[option->getModuleName() + "." + option->getLongParam()].as<std::string>();
-	}
-
-	if (help) {
-
-		printUsage();
-		exit(0);
-	}
-
-	// add the include option
-	ConfigFileOptions->add_options()
-			("include",
-			boost::program_options::value<std::vector<std::string> >()->composing(),
-			"Include another config file.");
-
-	// if config file is set, read from it as well
-	if (optionConfigFile) {
-
-		boost::filesystem::path configFile(optionConfigFile.as<std::string>());
-
-		if (boost::filesystem::exists(configFile))
-			readFromFile(configFile, values);
+		// get all options
+		boost::program_options::variables_map values;
+		if (ignoreUnknown)
+			boost::program_options::store(
+					boost::program_options::command_line_parser(argc, argv).
+					options(*CommandLineOptions).
+					positional(*Positional).
+					allow_unregistered().
+					run(),
+					values);
 		else
-			std::cerr << "ERROR: configuration file " << configFile << " does not exist" << std::endl;
+			boost::program_options::store(
+					boost::program_options::command_line_parser(argc, argv).
+					options(*CommandLineOptions).
+					positional(*Positional).
+					run(),
+					values);
+		boost::program_options::notify(values);
 
-	// otherwise, try to read from [binary_name].conf
-	} else {
+		// set initial program option values
+		foreach(program_option_impl* option, *Options) {
 
-		boost::filesystem::path defaultConfigFile(BinaryName + ".conf");
+			if (values.count(option->getLongParam()))
+				Values[option] = values[option->getLongParam()].as<std::string>();
 
-		if (boost::filesystem::exists(defaultConfigFile)) {
-
-			readFromFile(defaultConfigFile, values);
+			if (option->getModuleName() != "")
+				if (values.count(option->getModuleName() + "." + option->getLongParam()))
+					Values[option] = values[option->getModuleName() + "." + option->getLongParam()].as<std::string>();
 		}
-#if defined(SYSTEM_LINUX) || defined(SYSTEM_FREEBSD)
-		else {
 
-			// if this does not exist, look in the home directory
-			char const* home = getenv("HOME");
-			boost::filesystem::path homeConfigFile(std::string(home) + "/.config/" + BinaryName + "/config");
+		if (help) {
 
-			if (boost::filesystem::exists(homeConfigFile))
-				readFromFile(homeConfigFile, values);
+			printUsage();
+			exit(0);
 		}
-#endif
+
+		// add the include option
+		ConfigFileOptions->add_options()
+				("include",
+				boost::program_options::value<std::vector<std::string> >()->composing(),
+				"Include another config file.");
+
+		// if config file is set, read from it as well
+		if (optionConfigFile) {
+
+			boost::filesystem::path configFile(optionConfigFile.as<std::string>());
+
+			if (boost::filesystem::exists(configFile))
+				readFromFile(configFile, values);
+			else
+				std::cerr << "ERROR: configuration file " << configFile << " does not exist" << std::endl;
+
+		// otherwise, try to read from [binary_name].conf
+		} else {
+
+			boost::filesystem::path defaultConfigFile(BinaryName + ".conf");
+
+			if (boost::filesystem::exists(defaultConfigFile)) {
+
+				readFromFile(defaultConfigFile, values);
+			}
+	#if defined(SYSTEM_LINUX) || defined(SYSTEM_FREEBSD)
+			else {
+
+				// if this does not exist, look in the home directory
+				char const* home = getenv("HOME");
+				boost::filesystem::path homeConfigFile(std::string(home) + "/.config/" + BinaryName + "/config");
+
+				if (boost::filesystem::exists(homeConfigFile))
+					readFromFile(homeConfigFile, values);
+			}
+	#endif
+		}
+
+	} catch (boost::program_options::unknown_option& e) {
+
+		UTIL_THROW_EXCEPTION(
+				UsageError,
+				"unknown option: " << e.what());
 	}
 }
 
