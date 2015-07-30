@@ -1,3 +1,6 @@
+#ifndef UTIL_HELPERS_H__
+#define UTIL_HELPERS_H__
+
 /*
  *       Filename:  to_string.hpp
  *
@@ -202,4 +205,6 @@ std::ostream& operator<<(std::ostream& os, const std::set<T>& set) {
 }
 
 } // namespace std
+
+#endif // UTIL_HELPERS_H__
 
