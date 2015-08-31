@@ -15,7 +15,7 @@ class TimingStatistics {
 
 public:
 
-	typedef std::map<std::string, std::vector<Timer>> Timers;
+	typedef std::map<std::string, std::vector<Timer> > Timers;
 
 	TimingStatistics();
 

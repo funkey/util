@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include "timing.h"
+#include "foreach.h"
 
 TimingStatistics TimingStatistics::_instance;
 
@@ -43,7 +44,7 @@ TimingStatistics::~TimingStatistics() {
 	std::cout << "median   " << spacer;
 	std::cout << "total" << std::endl << std::endl;
 
-	for (const Timers::value_type& p : _timers) {
+	foreach (const Timers::value_type& p, _timers) {
 
 		const std::string&        identifier = p.first;
 		const std::vector<Timer>& timers     = p.second;
@@ -52,7 +53,7 @@ TimingStatistics::~TimingStatistics() {
 		double total = 0;
 		std::vector<double> times;
 
-		for (const Timer& t : timers) {
+		foreach (const Timer& t, timers) {
 
 			total += t.elapsed();
 			times.push_back(t.elapsed());
