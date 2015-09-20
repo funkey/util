@@ -121,6 +121,15 @@ struct rect {
 	 */
 	void fit(const point<T>& point) {
 
+		if (isZero()) {
+
+			minX = point.x;
+			maxX = point.x;
+			minY = point.y;
+			maxY = point.y;
+			return;
+		}
+
 		minX = std::min(point.x, minX);
 		minY = std::min(point.y, minY);
 		maxX = std::max(point.x, maxX);
@@ -131,6 +140,12 @@ struct rect {
 	 * Extend this rect, such that it fits the given rect.
 	 */
 	void fit(const rect<T>& rect) {
+
+		if (isZero()) {
+
+			*this = rect;
+			return;
+		}
 
 		minX = std::min(rect.minX, minX);
 		minY = std::min(rect.minY, minY);

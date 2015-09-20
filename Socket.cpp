@@ -115,7 +115,11 @@ bool Socket::accept ( Socket& new_socket ) const
 
 bool Socket::send ( const std::string s ) const
 {
+#ifdef __linux__
   int status = ::send ( m_sock, s.c_str(), s.size(), MSG_NOSIGNAL );
+#else
+  int status = ::send ( m_sock, s.c_str(), s.size(), 0);
+#endif
   if ( status == -1 )
     {
       return false;

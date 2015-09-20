@@ -18,8 +18,9 @@ namespace util {
 
 // forward declarations
 template <typename TargetType>
-class OptionConverter;
+struct OptionConverter;
 class program_option_impl;
+struct ProgramOptionsCleanup;
 
 // for sorting in the option set
 struct is_less {
@@ -39,7 +40,7 @@ class ProgramOptions {
 
 public:
 
-	static void init(int argc, char** argv);
+	static void init(int argc, char** argv, bool ignoreUnknown = false);
 
 	static bool isOptionSet(const program_option_impl& option);
 
@@ -50,7 +51,9 @@ public:
 	static void printUsage();
 
 private:
-	
+
+	friend struct ProgramOptionsCleanup;
+
 	ProgramOptions() {};
 
 	static void readFromFile(boost::filesystem::path configFile, boost::program_options::variables_map& values);
@@ -222,6 +225,29 @@ struct OptionConverter<bool> {
 		return true;
 	}
 };
+
+struct ProgramOptionsCleanup {
+
+	~ProgramOptionsCleanup() {
+
+		if (ProgramOptions::Options != 0)
+			delete ProgramOptions::Options;
+
+		if (ProgramOptions::KnownLongParams != 0)
+			delete ProgramOptions::KnownLongParams;
+
+		if (ProgramOptions::CommandLineOptions != 0)
+			delete ProgramOptions::CommandLineOptions;
+
+		if (ProgramOptions::Positional != 0)
+			delete ProgramOptions::Positional;
+
+		if (ProgramOptions::ConfigFileOptions  != 0)
+			delete ProgramOptions::ConfigFileOptions;
+	}
+};
+
+extern ProgramOptionsCleanup programOptionsCleanup;
 
 std::ostream&
 operator<<(std::ostream& os, program_option_impl& option);

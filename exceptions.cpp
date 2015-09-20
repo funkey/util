@@ -1,4 +1,6 @@
+#ifdef __linux__
 #include <sys/prctl.h>
+#endif
 #include <sys/wait.h>
 
 #include <boost/lexical_cast.hpp>
@@ -12,6 +14,7 @@ logger::LogChannel tracelog("tracelog", "[trace] ");
 
 stack_trace_::stack_trace_() {
 
+#ifdef __linux__
 	std::string programName = get_program_name();
 	std::string pid         = get_pid();
 
@@ -112,6 +115,8 @@ stack_trace_::stack_trace_() {
 		waitpid(childPid, NULL, 0);
 	}
 
+#endif // __linux__
+
 	return;
 }
 
@@ -155,7 +160,7 @@ stack_trace_::initialise_program_name() {
 		_program_name += name[i];
 }
 
-void handleException(boost::exception& e, std::ostream& out) {
+void handleException(const boost::exception& e, std::ostream& out) {
 
 	out << std::endl;
 	out << "caught exception" << std::endl << std::endl;
@@ -198,4 +203,12 @@ void handleException(boost::exception& e, std::ostream& out) {
 		out << "\t" << *boost::get_error_info<error_message>(e);
 		out << std::endl << std::endl;
 	}
+}
+
+std::ostream& operator<<(std::ostream& out, const stack_trace_& trace) {
+
+	for (unsigned int i = 0; i < trace.get_stack_trace().size(); i++)
+		out << trace.get_stack_trace()[i] << std::endl;
+
+	return out;
 }

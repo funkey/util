@@ -7,6 +7,7 @@ logger::LogChannel signalhandlerlog("signalhandlerlog", "[SignalHandler] ");
 void
 SignalHandler::init() {
 
+#ifdef __linux__
 	struct sigaction sa;
 	sa.sa_handler = handle_signal;
 	sa.sa_flags   = SA_ONESHOT | SA_ONSTACK;
@@ -19,11 +20,13 @@ SignalHandler::init() {
 	sigaction(SIGUSR1, &sa, 0);
 	sigaction(SIGTERM, &sa, 0);
 	sigaction(SIGABRT, &sa, 0);
+#endif
 }
 
 void
 SignalHandler::handle_signal(int signal) {
 
+#ifdef __linux__
 	if (signal == SIGSEGV) {
 
 		LOG_ERROR(signalhandlerlog) << "got segfault at:" << std::endl;
@@ -36,6 +39,7 @@ SignalHandler::handle_signal(int signal) {
 		LOG_USER(signalhandlerlog) << "got signal " << signal << " at:" << std::endl;
 		LOG_USER(signalhandlerlog) << stack_trace_() << std::endl;
 	}
+#endif
 }
 
 } // namespace util
