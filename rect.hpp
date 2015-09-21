@@ -287,6 +287,8 @@ util::rect<T> operator/(const util::rect<T>& p, const S& s) {
 	return result /= s;
 }
 
+namespace util {
+
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const util::rect<T>& rect) {
 
@@ -295,6 +297,8 @@ std::ostream& operator<<(std::ostream& os, const util::rect<T>& rect) {
 
 	return os;
 }
+
+} // namespace util
 
 #endif // UTIL_RECT_H__
 
