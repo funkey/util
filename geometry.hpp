@@ -138,6 +138,28 @@ bool intersect(const box<T,N>& b, const ray<T,N>& r, T& t) {
 	return intersects;
 }
 
+/**
+ * Compute the distance between two rays. s and t will be set with the positions 
+ * of the closest points.
+ */
+template <typename T>
+T distance(const ray<T,3>& ray1, const ray<T,3>& ray2, T& s, T& t) {
+
+	util::point<T,3> uv  = cross(ray1.direction(), ray2.direction());
+	util::point<T,3> a_b = ray1.position() - ray2.position();
+
+	T a = dot(ray1.direction(), ray1.direction());
+	T b = dot(ray1.direction(), ray2.direction());
+	T c = dot(ray2.direction(), ray2.direction());
+	T d = dot(ray1.direction(), ray1.position() - ray2.position());
+	T e = dot(ray2.direction(), ray1.position() - ray2.position());
+
+	s = (b*e - c*d)/(a*c - b*b);
+	t = (a*e - b*d)/(a*c - b*b);
+
+	return abs(dot(uv/length(uv), a_b));
+}
+
 } // namespace util
 
 #endif // UTIL_GEOMETRY_H__
