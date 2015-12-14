@@ -10,6 +10,11 @@ public:
 
 	plane() {}
 
+	template <typename S>
+	plane(const plane<S,N>& other) :
+		_position(other.position()),
+		_normal(other.normal()) {}
+
 	plane(
 			const util::point<T,N>& position,
 			const util::point<T,N>& normal) :

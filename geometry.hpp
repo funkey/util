@@ -160,6 +160,16 @@ T distance(const ray<T,3>& ray1, const ray<T,3>& ray2, T& s, T& t) {
 	return abs(dot(uv/length(uv), a_b));
 }
 
+/*
+ * Computes the signed distance between a point and a plane.
+ */
+template <typename T, int N>
+T distance(const plane<T,N>& plane, const point<T,N>& x) {
+
+	// project vector from plane point to x on plane normal
+	return dot(x - plane.position(),plane.normal())/length(plane.normal());
+}
+
 } // namespace util
 
 #endif // UTIL_GEOMETRY_H__
