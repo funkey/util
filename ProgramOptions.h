@@ -223,9 +223,20 @@ struct OptionConverter<bool> {
 		// option is not set
 		if (!ProgramOptions::isOptionSet(option)) {
 
-			// is its default "true"?
-			if (boost::lexical_cast<bool>(ProgramOptions::getOptionValue(option)))
-				return true;
+			try {
+
+				// is its default "true"?
+				if (boost::lexical_cast<bool>(ProgramOptions::getOptionValue(option)))
+					return true;
+
+			} catch (boost::bad_lexical_cast& e) {
+
+				UTIL_THROW_EXCEPTION(
+						UsageError,
+						"program option " << option.getLongParam() <<
+						" with value " << ProgramOptions::getOptionValue(option) <<
+						" can not be (lexically) cast into bool");
+			}
 
 			// otherwise, we say false
 			return false;
