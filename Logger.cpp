@@ -339,6 +339,10 @@ LogManager::init()
                      << "\" redirected to file \"" << file << "\"" << std::endl;
     }
  }
+ 
+#ifdef GIT_SHA1
+	LOG_USER(out) << "[LogManager] git sha1: " << GIT_SHA1 << std::endl;
+#endif
 }
 
 void
