@@ -14,6 +14,9 @@
 #include "Logger.h"
 #include "exceptions.h"
 #include "ProgramOptions.h"
+#ifdef HAVE_GIT_SHA1
+#include <git_sha1.h>
+#endif
 
 namespace logger {
 
@@ -340,8 +343,8 @@ LogManager::init()
     }
  }
  
-#ifdef GIT_SHA1
-	LOG_USER(out) << "[LogManager] git sha1: " << GIT_SHA1 << std::endl;
+#ifdef HAVE_GIT_SHA1
+	LOG_USER(out) << "[LogManager] git sha1 of this build: " << __git_sha1 << std::endl;
 #endif
 }
 
