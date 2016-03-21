@@ -41,7 +41,15 @@ class ProgramOptions {
 
 public:
 
+	/**
+	 * Init ProgramOptions from command line arguments.
+	 */
 	static void init(int argc, char** argv, bool ignoreUnknown = false);
+
+	/**
+	 * Init ProgramOptions from a config file.
+	 */
+	static void init(std::string configFile);
 
 	static bool isOptionSet(const program_option_impl& option);
 
@@ -56,6 +64,8 @@ private:
 	friend struct ProgramOptionsCleanup;
 
 	ProgramOptions() {};
+
+	static void init(int argc, char** argv, std::string configFileName, bool ignoreUnknown = false);
 
 	static void readFromFile(boost::filesystem::path configFile, boost::program_options::variables_map& values);
 

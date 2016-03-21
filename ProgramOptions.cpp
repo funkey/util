@@ -50,9 +50,22 @@ is_less::operator()(program_option_impl* left, program_option_impl* right) {
 void
 ProgramOptions::init(int argc, char** argv, bool ignoreUnknown) {
 
+	init(argc, argv, "", ignoreUnknown);
+}
+
+void
+ProgramOptions::init(std::string configFileName) {
+
+	init(0, NULL, configFileName);
+}
+
+void
+ProgramOptions::init(int argc, char** argv, std::string configFileName, bool ignoreUnknown) {
+
 	try {
 
-		BinaryName = argv[0];
+		if (argc > 0)
+			BinaryName = argv[0];
 
 		if (Options == 0)
 			Options = new std::set<program_option_impl*, is_less>();
@@ -101,6 +114,17 @@ ProgramOptions::init(int argc, char** argv, bool ignoreUnknown) {
 				("include",
 				boost::program_options::value<std::vector<std::string> >()->composing(),
 				"Include another config file.");
+
+		// if config file name was passed, parse it
+		if (configFileName.size() > 0) {
+
+			boost::filesystem::path configFile(configFileName);
+
+			if (boost::filesystem::exists(configFile))
+				readFromFile(configFile, values);
+			else
+				std::cerr << "ERROR: configuration file " << configFile << " does not exist" << std::endl;
+		}
 
 		// if config file is set, read from it as well
 		if (optionConfigFile) {
