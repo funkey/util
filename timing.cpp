@@ -8,7 +8,7 @@ TimingStatistics TimingStatistics::_instance;
 double
 Timer::elapsed() const {
 
-	boost::chrono::nanoseconds ns(_timer.elapsed().wall);
+	boost::chrono::nanoseconds ns(_timer.elapsed().system);
 	boost::chrono::duration<double> s = ns;
 
 	return s.count();
@@ -30,7 +30,7 @@ TimingStatistics::~TimingStatistics() {
 	const std::string spacer("   ");
 
 	std::cout
-			<< "timing summary in seconds (wall time):"
+			<< "timing summary in seconds (cpu time):"
 			<< std::endl << std::endl;
 
 	for (int i = 0; i < _longestIdentifierLength; i++)
