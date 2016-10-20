@@ -15,23 +15,19 @@ class TimingStatistics {
 
 public:
 
-	typedef std::map<std::string, std::vector<Timer>> Timers;
+	typedef std::map<std::string, std::vector<float>> Times;
 
 	TimingStatistics();
 
-	static void addTimer(const Timer& timer);
+	static void addTimer(const std::string& identifier, float elapsed);
 
 	~TimingStatistics();
 
 private:
 
-	void add(const Timer& timer);
-
 	static TimingStatistics _instance;
 
-	Timers _timers;
-
-	size_t _longestIdentifierLength;
+	Times _times;
 };
 
 class Timer {
@@ -39,21 +35,15 @@ class Timer {
 public:
 
 	Timer(std::string identifier) :
-		_identifier(identifier),
-		_done(false) {
+		_identifier(identifier) {
 
 		_timer.start();
 	}
 
 	~Timer() {
 
-		if (_done)
-			return;
-
 		_timer.stop();
-		_done = true;
-
-		TimingStatistics::addTimer(*this);
+		TimingStatistics::addTimer(getIdentifier(), elapsed());
 	}
 
 	const std::string& getIdentifier() const { return _identifier; }
@@ -61,15 +51,13 @@ public:
 	/**
 	 * Return the elapsed time in seconds.
 	 */
-	double elapsed() const;
+	float elapsed() const;
 
 private:
 
 	std::string _identifier;
 
 	boost::timer::cpu_timer _timer;
-
-	bool _done;
 };
 
 #endif // UTIL_TIMING_H__

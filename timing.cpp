@@ -5,26 +5,25 @@
 
 TimingStatistics TimingStatistics::_instance;
 
-double
+float
 Timer::elapsed() const {
 
-	boost::chrono::nanoseconds ns(_timer.elapsed().system);
-	boost::chrono::duration<double> s = ns;
+	boost::chrono::nanoseconds ns(_timer.elapsed().system + _timer.elapsed().user);
+	boost::chrono::duration<float> s = ns;
 
 	return s.count();
 }
-TimingStatistics::TimingStatistics() :
-	_longestIdentifierLength(0) {}
+TimingStatistics::TimingStatistics() {}
 
 void
-TimingStatistics::addTimer(const Timer& timer) {
+TimingStatistics::addTimer(const std::string& identifier, float elapsed) {
 
-	_instance.add(timer);
+	_instance._times[identifier].push_back(elapsed);
 }
 
 TimingStatistics::~TimingStatistics() {
 
-	if (_timers.size() == 0)
+	if (_times.size() == 0)
 		return;
 
 	const std::string spacer("   ");
@@ -33,7 +32,14 @@ TimingStatistics::~TimingStatistics() {
 			<< "timing summary in seconds (cpu time):"
 			<< std::endl << std::endl;
 
-	for (int i = 0; i < _longestIdentifierLength; i++)
+	int longestIdentifierLength = 0;
+	for (const Times::value_type& p : _times) {
+
+		const std::string&  identifier = p.first;
+		longestIdentifierLength = std::max(longestIdentifierLength, (int)identifier.size());
+	}
+
+	for (int i = 0; i < longestIdentifierLength; i++)
 		std::cout << " ";
 	std::cout << spacer;
 	std::cout << "   # runs" << spacer;
@@ -43,32 +49,28 @@ TimingStatistics::~TimingStatistics() {
 	std::cout << "median   " << spacer;
 	std::cout << "total" << std::endl << std::endl;
 
-	for (const Timers::value_type& p : _timers) {
+	for (Times::value_type& p : _times) {
 
-		const std::string&        identifier = p.first;
-		const std::vector<Timer>& timers     = p.second;
+		const std::string&  identifier = p.first;
+		std::vector<float>& times      = p.second;
 
-		int numRuns = timers.size();
-		double total = 0;
-		std::vector<double> times;
+		int numRuns = times.size();
+		float total = 0;
 
-		for (const Timer& t : timers) {
+		for (float t : times)
+			total += t;
 
-			total += t.elapsed();
-			times.push_back(t.elapsed());
-		}
-
-		double mean = total/numRuns;
+		float mean = total/numRuns;
 
 		std::nth_element(times.begin(), times.begin(), times.end());
-		double min    = times[0];
+		float min    = times[0];
 		std::nth_element(times.begin(), times.begin() + numRuns - 1, times.end());
-		double max    = times[numRuns - 1];
+		float max    = times[numRuns - 1];
 		std::nth_element(times.begin(), times.begin() + numRuns/2, times.end());
-		double median = times[numRuns/2];
+		float median = times[numRuns/2];
 
 		std::cout << identifier;
-		for (int i = 0; i < _longestIdentifierLength - identifier.size(); i++)
+		for (int i = 0; i < longestIdentifierLength - identifier.size(); i++)
 			std::cout << " ";
 		std::cout << spacer;
 		std::cout << std::setw(9) << std::setfill(' ');
@@ -81,11 +83,4 @@ TimingStatistics::~TimingStatistics() {
 		std::cout << total;
 		std::cout << std::endl;
 	}
-}
-
-void
-TimingStatistics::add(const Timer& timer) {
-
-	_timers[timer.getIdentifier()].push_back(timer);
-	_longestIdentifierLength = std::max(_longestIdentifierLength, timer.getIdentifier().size());
 }
