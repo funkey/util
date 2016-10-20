@@ -76,6 +76,8 @@ public:
 
 	size_t size() const { return _cache.size(); }
 
+	bool clear() { if (!size()) return false; _cache.clear(); return true; }
+
 private:
 
 	void put(const K& k, V v) {
