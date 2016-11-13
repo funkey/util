@@ -153,6 +153,39 @@ public:
 	}
 
 	/**
+	 * Like type converter above, but to be used in boolean expressions.
+	 */
+	explicit operator bool() const {
+
+		// option is not set
+		if (!ProgramOptions::isOptionSet(*this)) {
+
+			try {
+
+				// is its default "true"?
+				if (boost::lexical_cast<bool>(ProgramOptions::getOptionValue(*this)))
+					return true;
+
+			} catch (boost::bad_lexical_cast&) {
+
+				UTIL_THROW_EXCEPTION(
+						UsageError,
+						"program option " << getLongParam() <<
+						" with value " << ProgramOptions::getOptionValue(*this) <<
+						" can not be (lexically) cast into bool");
+			}
+
+			// otherwise, we say false
+			return false;
+		}
+
+		if (ProgramOptions::getOptionValue(*this) == "false")
+			return false;
+
+		return true;
+	}
+
+	/**
 	 * Explicit conversion to ValueType.
 	 */
 	template <typename ValueType>
@@ -210,7 +243,7 @@ struct OptionConverter {
 
 			return boost::lexical_cast<TargetType>(ProgramOptions::getOptionValue(option));
 
-		} catch (boost::bad_lexical_cast& e) {
+		} catch (boost::bad_lexical_cast&) {
 
 			UTIL_THROW_EXCEPTION(
 					UsageError,
@@ -230,32 +263,7 @@ struct OptionConverter<bool> {
 
 	bool operator()(const program_option_impl& option) const {
 
-		// option is not set
-		if (!ProgramOptions::isOptionSet(option)) {
-
-			try {
-
-				// is its default "true"?
-				if (boost::lexical_cast<bool>(ProgramOptions::getOptionValue(option)))
-					return true;
-
-			} catch (boost::bad_lexical_cast& e) {
-
-				UTIL_THROW_EXCEPTION(
-						UsageError,
-						"program option " << option.getLongParam() <<
-						" with value " << ProgramOptions::getOptionValue(option) <<
-						" can not be (lexically) cast into bool");
-			}
-
-			// otherwise, we say false
-			return false;
-		}
-
-		if (ProgramOptions::getOptionValue(option) == "false")
-			return false;
-
-		return true;
+		return static_cast<bool>(option);
 	}
 };
 

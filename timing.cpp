@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include <boost/chrono.hpp>
 #include "timing.h"
 
 TimingStatistics TimingStatistics::_instance;

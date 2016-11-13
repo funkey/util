@@ -1,7 +1,8 @@
-#ifdef __linux__
+#include <config.h>
+#ifdef SYSTEM_UNIX
 #include <sys/prctl.h>
-#endif
 #include <sys/wait.h>
+#endif
 
 #include <boost/lexical_cast.hpp>
 
@@ -14,7 +15,7 @@ logger::LogChannel tracelog("tracelog", "[trace] ");
 
 stack_trace_::stack_trace_() {
 
-#ifdef __linux__
+#ifdef SYSTEM_UNIX
 	std::string programName = get_program_name();
 	std::string pid         = get_pid();
 
@@ -115,7 +116,7 @@ stack_trace_::stack_trace_() {
 		waitpid(childPid, NULL, 0);
 	}
 
-#endif // __linux__
+#endif // SYSTEM_UNIX
 
 	return;
 }
@@ -138,12 +139,17 @@ stack_trace_::get_program_name() {
 std::string
 stack_trace_::get_pid() {
 
+#ifdef SYSTEM_UNIX
 	return boost::lexical_cast<std::string>(getpid());
+#else
+	return "unknown";
+#endif
 }
 
 void
 stack_trace_::initialise_program_name() {
 
+#ifdef SYSTEM_UNIX
 	char link[1024];
 	char name[1024];
 
@@ -158,6 +164,7 @@ stack_trace_::initialise_program_name() {
 
 	for (int i = 0; i < size; i++)
 		_program_name += name[i];
+#endif
 }
 
 void handleException(const boost::exception& e, std::ostream& out) {

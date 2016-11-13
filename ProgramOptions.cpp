@@ -1,10 +1,15 @@
+#include <config.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <set>
+#include <map>
+#ifdef SYSTEM_UNIX
 #include <sys/ioctl.h> // to get environment variables
+#endif
 
 #include <boost/program_options.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -145,7 +150,7 @@ ProgramOptions::init(int argc, char** argv, std::string configFileName, bool ign
 
 				readFromFile(defaultConfigFile, values);
 			}
-	#if defined(SYSTEM_UNIX)
+	#ifdef SYSTEM_UNIX
 			else {
 
 				// if this does not exist, look in the home directory
@@ -169,7 +174,7 @@ ProgramOptions::init(int argc, char** argv, std::string configFileName, bool ign
 void
 ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_options::variables_map& values) {
 
-	unsigned int beginNewInclude;
+	std::size_t beginNewInclude;
 
 	if (values.count("include"))
 		beginNewInclude = values["include"].as<std::vector<std::string> >().size();
@@ -206,7 +211,7 @@ ProgramOptions::readFromFile(boost::filesystem::path configFile, boost::program_
 		}
 	}
 
-	unsigned int endNewInclude = beginNewInclude;
+	std::size_t endNewInclude = beginNewInclude;
 
 	if(values.count("include"))
 		endNewInclude = values["include"].as<std::vector<std::string> >().size();
@@ -469,9 +474,13 @@ ProgramOptions::printUsage() {
 			"\n";
 
 	// get tty width:
-	winsize wsize;
-	ioctl(0, TIOCGWINSZ, &wsize);
-	int numColumns = std::min(wsize.ws_col - 5, 100);
+	#ifdef SYSTEM_WINDOWS
+		int numColumns = 80;
+	#else
+		winsize wsize;
+		ioctl(0, TIOCGWINSZ, &wsize);
+		int numColumns = std::min(wsize.ws_col - 5, 100);
+	#endif
 
 	printBlock(optionsText, 0, numColumns, std::cout);
 
@@ -533,9 +542,13 @@ operator<<(std::ostream& os, program_option_impl& option) {
 	int sizeArgumentSketch  = option.getArgumentSketch().length();
 
 	// get tty width:
+#ifdef SYSTEM_WINDOWS
+	int numColumns = 80;
+#else
 	winsize wsize;
 	ioctl(0, TIOCGWINSZ, &wsize);
 	int numColumns = std::min(wsize.ws_col - 5, 100);
+#endif
 
 	int spaceIndentation = 2;
 	int spaceLongParam   = 25;

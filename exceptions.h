@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <sstream>
-#include <execinfo.h>
 
 #include <boost/exception/all.hpp>
 
