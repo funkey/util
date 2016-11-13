@@ -145,7 +145,7 @@ ProgramOptions::init(int argc, char** argv, std::string configFileName, bool ign
 
 				readFromFile(defaultConfigFile, values);
 			}
-	#if defined(SYSTEM_LINUX) || defined(SYSTEM_FREEBSD)
+	#if defined(SYSTEM_UNIX)
 			else {
 
 				// if this does not exist, look in the home directory
