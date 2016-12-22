@@ -1,5 +1,5 @@
 #include <config.h>
-#ifdef SYSTEM_UNIX
+#if defined(SYSTEM_UNIX) && !defined(SYSTEM_MAC)
 #include <sys/prctl.h>
 #include <sys/wait.h>
 #endif
@@ -15,7 +15,7 @@ logger::LogChannel tracelog("tracelog", "[trace] ");
 
 stack_trace_::stack_trace_() {
 
-#ifdef SYSTEM_UNIX
+#if defined(SYSTEM_UNIX) && !defined(SYSTEM_MAC)
 	std::string programName = get_program_name();
 	std::string pid         = get_pid();
 
@@ -116,7 +116,7 @@ stack_trace_::stack_trace_() {
 		waitpid(childPid, NULL, 0);
 	}
 
-#endif // SYSTEM_UNIX
+#endif // SYSTEM_UNIX && !SYSTEM_MAC
 
 	return;
 }
@@ -139,7 +139,7 @@ stack_trace_::get_program_name() {
 std::string
 stack_trace_::get_pid() {
 
-#ifdef SYSTEM_UNIX
+#if defined(SYSTEM_UNIX) && !defined(SYSTEM_MAC)
 	return boost::lexical_cast<std::string>(getpid());
 #else
 	return "unknown";
@@ -149,7 +149,7 @@ stack_trace_::get_pid() {
 void
 stack_trace_::initialise_program_name() {
 
-#ifdef SYSTEM_UNIX
+#if defined(SYSTEM_UNIX) && !defined(SYSTEM_MAC)
 	char link[1024];
 	char name[1024];
 
