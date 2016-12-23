@@ -46,6 +46,8 @@ public:
 
 	static std::string getOptionValue(const program_option_impl& option);
 
+	static void setOptionValue(std::string longName, std::string value);
+
 	static void addProgramOption(program_option_impl* option);
 
 	static void printUsage();

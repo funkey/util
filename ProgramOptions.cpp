@@ -218,6 +218,15 @@ ProgramOptions::getOptionValue(const program_option_impl& option) {
 }
 
 void
+ProgramOptions::setOptionValue(std::string longName, std::string value) {
+
+	foreach(const program_option_impl* option, *Options) {
+		if (option->getLongParam().compare(longName) == 0)
+			Values[option] = value;
+	}
+}
+
+void
 ProgramOptions::addProgramOption(program_option_impl* option) {
 
 	if (Options == 0)
