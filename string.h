@@ -5,17 +5,6 @@
 #include <sstream>
 #include <vector>
 
-std::vector<std::string> split(const std::string& s, char delim) {
-
-	std::vector<std::string> tokens;
-	std::stringstream ss(s);
-	std::string token;
-
-	while (getline(ss, token, delim))
-		tokens.push_back(token);
-
-	return tokens;
-}
+std::vector<std::string> split(const std::string& s, char delim);
 
 #endif // UTIL_STRING_H__
-
