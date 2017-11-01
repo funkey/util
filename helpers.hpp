@@ -176,7 +176,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
   os << "[";
 
-  for (unsigned int i = 0; i < vector.size(); i++) {
+  for (size_t i = 0; i < vector.size(); i++) {
       os << vector[i];
       if (i != vector.size() - 1)
         os << ", ";
